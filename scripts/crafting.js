@@ -37,7 +37,7 @@ function collectWorldLoot(o){
  }else if(o.type==='looseItem'&&!(o.delay>0)){
   if(!itemAllowed(o.item)){o.life=0;return}
   const storage=itemStorage(o.item);if(storage.list.length>=storage.capacity)return;
-  storage.list.push(o.item);o.collected=true;o.life=0;message=ITEM_NAMES[o.item]+' eingesammelt ('+(storage.category==='builds'?'Bausachen':'Powers')+').';playSound('pickup');
+  storage.list.push(o.item);o.collected=true;if(o.secretRewardSlot)o.secretRewardSlot.collected=true;o.life=0;message=ITEM_NAMES[o.item]+' eingesammelt ('+(storage.category==='builds'?'Bausachen':'Powers')+').';playSound('pickup');
  }
 }
 function updateLooseItem(o){

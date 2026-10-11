@@ -58,7 +58,7 @@ const chars=[
 let screen='start', selected=0, keys={}, buttons=[], player, enemies, objects, particles, level, boss, door, message, timer, camera=0;
 function reset(){
  screen='play';keys={};heldPointers.clear();
- player={x:150,y:ground-58,w:43,h:58,vx:0,vy:0,onGround:true, hp:MAX_HP, cooldown:0, inv:0, shield:0, slow:0,swing:null,seatedCatapult:null,climbing:null,ladderDetach:0,launchFrames:0,launchVX:0,swingsUsed:0,swingCooldown:0,inventory:[],inventoryIndex:0,buildInventory:[],buildInventoryIndex:0,inventoryCategory:'powers',bag:{sugar:0,herbs:0,spice:0,stone:0,spoon:0,wood:0},buddyIndex:selectedBuddy,marshmallowTime:0,gliding:false,bubble:0,jumpBoost:0,fireTime:0,fireCooldown:0,facing:1,walkPhase:0,hasKey:false,score:0};
+ player={x:150,y:ground-58,w:43,h:58,vx:0,vy:0,onGround:true, hp:MAX_HP, cooldown:0, inv:0, shield:0, slow:0,honeyTime:0,swing:null,seatedCatapult:null,climbing:null,ladderDetach:0,launchFrames:0,launchVX:0,swingsUsed:0,swingCooldown:0,inventory:[],inventoryIndex:0,buildInventory:[],buildInventoryIndex:0,inventoryCategory:'powers',bag:{sugar:0,herbs:0,spice:0,stone:0,spoon:0,wood:0},buddyIndex:selectedBuddy,secretBuddyIndex:null,marshmallowTime:0,gliding:false,bubble:0,jumpBoost:0,fireTime:0,fireCooldown:0,facing:1,walkPhase:0,hasKey:false,score:0};
  enemies=[]; objects=[]; particles=[]; defeated=[];playerDeathTimer=0;level=selectedLevel; boss=null; message='Level 1'; timer=120; spawnLevel();
 }
 function spawnLevel(){
@@ -83,7 +83,7 @@ function spawnLevel(){
   if(section%5===0){const itemX=pos+width+35;objects.push({type:'looseItem',item:ITEM_TYPES[section%3],x:itemX,y:floorAtX(itemX)-34,w:34,h:34,life:Infinity,delay:0})}
  }
  trees.push({x:levelWidth-300,baseY:ground,hookX:levelWidth-225,hookY:335});hooks.push({x:levelWidth-225,y:335,tree:true});hooks.sort((a,b)=>a.x-b.x);
- player.x=150;player.y=ground-player.h;player.vx=0;player.vy=0;player.onGround=true;player.hasKey=false;player.swing=null;player.seatedCatapult=null;player.climbing=null;player.launchFrames=0;player.ladderDetach=0;player.swingsUsed=0;player.swingCooldown=0;player.slow=0;player.marshmallowTime=0;player.gliding=false;player.bubble=0;player.fireTime=0;player.inv=90;
+ player.x=150;player.y=ground-player.h;player.vx=0;player.vy=0;player.onGround=true;player.hasKey=false;player.swing=null;player.seatedCatapult=null;player.climbing=null;player.launchFrames=0;player.ladderDetach=0;player.swingsUsed=0;player.swingCooldown=0;player.slow=0;player.honeyTime=0;player.marshmallowTime=0;player.gliding=false;player.bubble=0;player.fireTime=0;player.inv=90;
  const keyX=manholeSpot(levelWidth-1250)??levelWidth-700;
  objects.push({type:'key',x:keyX,y:floorAtX(keyX)-60,w:34,h:46,collected:false});
  const count=LEVEL_SETTINGS[level].enemies;
@@ -134,7 +134,7 @@ function update(){
  updatePlacedLadders();updateKitchenWeather();updateWorldWind();
  let p=player;const previousX=p.x,previousBottom=p.y+p.h;
  if(p.swingCooldown>0){p.swingCooldown--;if(p.swingCooldown===0)p.swingsUsed=0}
- p.cooldown=Math.max(0,p.cooldown-1);p.inv=Math.max(0,p.inv-1);p.shield=Math.max(0,p.shield-1);p.slow=Math.max(0,p.slow-1);if(p.bubble===1)popBubble();p.bubble=Math.max(0,p.bubble-1);p.fireTime=Math.max(0,p.fireTime-1);p.fireCooldown=Math.max(0,p.fireCooldown-1);p.jumpBoost=Math.max(0,p.jumpBoost-1);p.marshmallowTime=Math.max(0,(p.marshmallowTime||0)-1);p.gliding=false;
+ p.cooldown=Math.max(0,p.cooldown-1);p.inv=Math.max(0,p.inv-1);p.shield=Math.max(0,p.shield-1);p.slow=Math.max(0,p.slow-1);p.honeyTime=Math.max(0,(p.honeyTime||0)-1);if(p.bubble===1)popBubble();p.bubble=Math.max(0,p.bubble-1);p.fireTime=Math.max(0,p.fireTime-1);p.fireCooldown=Math.max(0,p.fireCooldown-1);p.jumpBoost=Math.max(0,p.jumpBoost-1);p.marshmallowTime=Math.max(0,(p.marshmallowTime||0)-1);p.gliding=false;
  const move=(keys.ArrowLeft||keys.a||keys.touchLeft?-1:0)+(keys.ArrowRight||keys.d||keys.touchRight?1:0);if(move)p.facing=move;
  if(!updatePuddingTrap()&&!updateTraversal(move)){
  if(isSwimming()){p.vx+=move*(p.slow?.15:.36);p.vx*=.88;updateSwimmingVelocity()}
@@ -191,7 +191,7 @@ function update(){
   if(o.type==='peel'){o.life--; for(const e of enemies)if(!e.dead&&rect(o,e)){e.slow=110;e.vx=4}}
   if(o.type==='colaFlow'){
    o.life--;o.age++;o.spread=Math.min(155,o.spread+.4);o.x=o.sourceX-o.spread;o.w=o.spread*2;
-   if(rect(p,o)){p.slow=20;hitPlayer(1,p.x<o.sourceX?-2:2)}
+   if(rect(p,o)){p.slow=Math.max(p.slow,20);hitPlayer(1,p.x<o.sourceX?-2:2)}
    for(const e of enemies)if(!e.dead&&rect(e,o)&&!(e.colaCooldown>0)){
     e.hp--;e.colaCooldown=90;if(e.hp<=0)killEnemy(e)
    }
@@ -228,7 +228,7 @@ function update(){
   }
   if((e.type==='lemon'||e.type==='moldCheese'||e.type==='taco')&&e.shoot<=0&&Math.abs(d)<480){const spore=e.type==='moldCheese',taco=e.type==='taco';e.shoot=Math.round((taco?220:spore?210:180)*worldSettings().shootRate);objects.push({type:'mentos',spore,taco,x:e.x+e.w/2,y:e.y+6,w:13,h:13,vx:(d>0?1:-1)*(taco?3.1:spore?1.25:MENTOS_SPEED),vy:-3.2,life:220})}
   if(canStomp(e,previousBottom,previousEnemyY)){e.hp--;if(e.hp<=0)killEnemy(e);bounceAfterStomp(e)}
-  else if(rect(p,e)){if(e.type==='pudding')trapInPudding(e);else hitPlayer(e.damage,d>0?5:-5);}
+  else if(rect(p,e)){if(e.type==='pudding')trapInPudding(e);else{if(e.type==='honey'){p.slow=Math.max(p.slow,180);p.honeyTime=180}hitPlayer(e.damage,d>0?5:-5);}}
  }
  for(const o of objects)if(o.type==='mentos'&&o.life>0){
   o.vy=(o.vy||0)+(isSwimming()?.04:o.spore?.08:MENTOS_GRAVITY);o.x+=o.vx;o.y+=o.vy;o.life--;
@@ -241,7 +241,7 @@ function update(){
   if(solidTerrain(true).some(w=>rect(o,w)))o.life=0;
   if(o.y+o.h>=floorAtX(o.x+o.w/2)||o.x+o.w<0||o.x>(boss?W:levelWidth))o.life=0;
  }
- updateMandarinBabies();updateCompanion();
+ updateMandarinBabies();updateCompanions();
  enemies=enemies.filter(e=>!e.dead);
  updateBossFight(previousBottom);updateTutorial();
 
@@ -361,6 +361,7 @@ function drawGame(){
   if(['manhole','manholeOutlet','sewerExit'].includes(o.type))drawManhole(o);
   if(o.type==='cheeseDrop')drawCheeseDrop(o);
   if(o.type==='secretExit')drawSecretExit(o);
+  if(o.type==='sewerTreasure')drawSewerTreasure(o);
   if(o.type==='fire')drawFlame(o);
   if(o.type==='cola')drawBottle(o);
   if(o.type==='peel')sprite('peel',o.x-5,o.y-26,52,40);
@@ -373,7 +374,7 @@ function drawGame(){
  drawBossWarning();drawBossBodies();
  for(const q of particles)if(q.type==='smoke')drawParticle(q);
  for(const q of particles)if(q.type!=='smoke')drawParticle(q);
- drawCompanion();drawMandarinBabies();
+ drawCompanion();drawCompanion(secretCompanion);drawMandarinBabies();
  if(player.swing){x.strokeStyle='#ffe19a';x.lineWidth=4;x.beginPath();x.moveTo(player.swing.x,player.swing.y);x.lineTo(player.x+player.w/2,player.y+20);x.stroke()}
  for(const d of defeated){
   x.save();x.translate(d.x,d.y);x.rotate(d.angle);x.globalAlpha=Math.min(1,d.life/20);const squash=1+.15*Math.sin((d.maxLife-d.life)*.3);x.scale(squash,1/squash);sprite(d.art,-d.size/2,-d.size/2,d.size,d.size);x.restore();
@@ -392,7 +393,7 @@ function drawGame(){
  // mobile controls (screen coordinates, independent of camera)
  buttons=[{id:'left',x:25,y:H-85,w:64,h:55,label:'←'},{id:'right',x:98,y:H-85,w:64,h:55,label:'→'},{id:'item',x:W-246,y:H-85,w:64,h:55,label:'F'},{id:'jump',x:W-170,y:H-85,w:64,h:55,label:'↑'},{id:'ability',x:W-94,y:H-85,w:70,h:55,label:'★'}];
  buttons.push({id:'inventory',x:W-326,y:H-85,w:64,h:55,label:'I'},{id:'pause',x:W-94,y:H-134,w:70,h:38,label:'II'});
- if(nearBossDoor()||nearbyCatapult()||nearbyManhole()||nearbySecretExit()||nearbyLadder()||player.climbing||nearbyTutorialStation())buttons.push({id:'interact',x:W-406,y:H-85,w:70,h:55,label:'W'});
+ if(nearBossDoor()||nearbyCatapult()||nearbyManhole()||nearbySecretExit()||nearbySewerTreasure()||nearbyLadder()||player.climbing||nearbyTutorialStation())buttons.push({id:'interact',x:W-406,y:H-85,w:70,h:55,label:'W'});
  if(isSwimming())buttons.push({id:'climbUp',x:25,y:H-150,w:64,h:55,label:'↑'});
  if(isSwimming()||nearbyLadder()||player.climbing)buttons.push({id:'climbDown',x:98,y:H-150,w:64,h:55,label:'↓'});
  for(const b of buttons){x.fillStyle='rgba(30,30,60,.55)';x.fillRect(b.x,b.y,b.w,b.h);x.fillStyle='#fff';x.font='30px system-ui';x.textAlign='center';x.fillText(b.label,b.x+b.w/2,b.y+29);if(['ability','item','door','inventory','interact','climbUp','climbDown'].includes(b.id)){x.font='10px system-ui';x.fillText(b.id==='ability'?'SPEZIAL / E':b.id==='item'?'ITEM / F':b.id==='inventory'?'BAG / I':b.id==='interact'?'NUTZEN / W':b.id==='climbUp'?'HOCH / W':b.id==='climbDown'?'RUNTER / S':'TÜR / Q',b.x+b.w/2,b.y+47)}}

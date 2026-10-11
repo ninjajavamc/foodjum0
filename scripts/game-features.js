@@ -86,6 +86,7 @@ function updateMarshmallowGlide(){
  if(p.gliding)p.vy=Math.min(p.vy,Math.max(.35,worldGravity()*2.2));
 }
 function drawMarshmallowEffect(){
+ if(player.honeyTime>0&&screen==='play'){x.save();x.fillStyle='rgba(239,183,62,.65)';x.strokeStyle='#b98934';x.lineWidth=1.5;for(const dx of [8,29]){x.beginPath();x.ellipse(player.x+dx,player.y+player.h-3,9,4,0,0,Math.PI*2);x.fill();x.stroke()}x.restore()}
  if(!player.gliding||screen!=='play')return;
  x.save();x.strokeStyle='#fff3ed';x.lineWidth=2;x.globalAlpha=.8;
  for(const side of [-1,1]){const px=player.x+player.w/2+side*32,py=player.y+10+Math.sin(tick*.1)*3;x.beginPath();x.moveTo(px,py+30);x.quadraticCurveTo(px+side*8,py+12,px,py);x.stroke()}
@@ -224,5 +225,6 @@ function drawItemHud(){
  x.fillStyle=undergroundTrip||worldSettings().theme==='crystal'?'#e7eccc':'#203b52';x.font='11px system-ui';if(showGameplayHints())x.fillText('1/2: Powers · 3/4/5: Bausachen',17,224);
  if(player.hasKey){sprite('key',288,101,30,40);x.fillText('Schlüssel',320,125)}
  if(player.fireTime>0)x.fillText(showGameplayHints()?'Wasabi: F zum Feuerspucken':'Wasabi',17,241);else if(player.bubble>0)x.fillText('Blase platzt gleich!',17,241);else if(player.jumpBoost>0)x.fillText('Sprungfeder aktiv!',17,241);else if(player.marshmallowTime>0)x.fillText((player.gliding?'Gleiten':'Marshmallow')+' · '+Math.ceil(player.marshmallowTime/60)+' s',17,241);
+ if(player.honeyTime>0){x.fillStyle='rgba(50,37,22,.78)';x.fillRect(13,244,95,18);x.fillStyle='#ffdf86';x.fillText('Honig · '+Math.ceil(player.honeyTime/60)+' s',17,257);}
  x.restore();
 }

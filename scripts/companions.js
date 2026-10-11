@@ -5,12 +5,23 @@ const BUDDIES=[
  {art:'toothbrush',name:'Zahnbürste',text:'Folgt dir und schrubbt nahe Gegner für 0,5 HP.'}
 ];
 const COMPANION_DAMAGE=.5,DOG_BITE_COOLDOWN=180;
-let selectedBuddy=0,companion=null,buddyCards=[];
+let selectedBuddy=0,companion=null,secretCompanion=null,buddyCards=[];
 function resetCompanion(preserve=false){
  const saved=preserve&&companion?companion.cola:0;
  const index=player.buddyIndex??selectedBuddy;player.buddyIndex=index;
+ const savedBonus=preserve&&secretCompanion?secretCompanion.cola:0;
  companion={type:BUDDIES[index].art,x:player.x-65,y:ground-40,w:52,h:40,vx:0,vy:0,onGround:true,cola:saved,cooldown:0,walk:0,action:0};
+ const bonus=player.secretBuddyIndex;
+ secretCompanion=Number.isInteger(bonus)&&BUDDIES[bonus]&&bonus!==index?{type:BUDDIES[bonus].art,x:player.x-125,y:player.y+8,w:52,h:40,vx:0,vy:0,onGround:false,cola:savedBonus,cooldown:0,walk:0,action:0}:null;
 }
+function recruitSecretBuddy(index){
+ if(player.secretBuddyIndex!==null&&player.secretBuddyIndex!==undefined)return false;
+ if(!BUDDIES[index]||index===player.buddyIndex)return false;
+ player.secretBuddyIndex=index;
+ secretCompanion={type:BUDDIES[index].art,x:player.x-125,y:player.y+8,w:52,h:40,vx:0,vy:0,onGround:false,cola:0,cooldown:0,walk:0,action:0};
+ return true;
+}
+function updateCompanions(){updateCompanion();updateCompanion(secretCompanion,125)}
 function drawBuddyChoose(){
  x.fillStyle='rgba(20,20,45,.9)';x.fillRect(0,0,W,H);x.textAlign='center';x.fillStyle='#fff';x.font='bold 38px system-ui';x.fillText('Wähle deinen Begleiter',W/2,105);x.font='19px system-ui';x.fillText(worldName(selectedLevel)+' · Deine Figur: '+chars[selected].name,W/2,145);drawMenuBack();
  buddyCards=BUDDIES.map((buddy,i)=>({x:40+i*240,y:185,w:200,h:290,id:i}));
@@ -23,10 +34,10 @@ function buddyKey(event){
  if(event.key==='Escape')screen='choose';
  if(event.key==='Enter'||event.key===' ')reset();
 }
-function updateCompanion(){
- if(!companion||screen!=='play')return;
- const b=companion;b.cooldown=Math.max(0,b.cooldown-1);b.action=Math.max(0,b.action-1);
- const targetX=player.x-player.facing*65;
+function updateCompanion(b=companion,followDistance=65){
+ if(!b||screen!=='play')return;
+ b.cooldown=Math.max(0,b.cooldown-1);b.action=Math.max(0,b.action-1);
+ const targetX=player.x-player.facing*followDistance;
  if(Math.abs(b.x-player.x)>420){b.x=targetX;b.y=player.y;b.vy=0}
  if(b.type==='sponge'){
   b.x+=(targetX-b.x)*.12;b.y+=(player.y+8+Math.sin(tick*.07)*4-b.y)*.12;
@@ -82,9 +93,10 @@ function updateBuddyFoam(o){
 }
 function drawBuddyFoam(o){x.fillStyle='#f5ffed';x.strokeStyle='#72beb5';x.lineWidth=2;x.beginPath();x.ellipse(o.x+9,o.y+9,9,6,0,0,Math.PI*2);x.fill();x.stroke()}
 function drawBuddyCola(o){x.fillStyle='#754530';x.strokeStyle='#d6b579';x.lineWidth=2;x.beginPath();x.ellipse(o.x+9,o.y+9,8,6,0,0,Math.PI*2);x.fill();x.stroke()}
-function drawCompanion(){
- if(!companion)return;
- const b=companion;x.save();if(isSwimming()){x.translate(b.x+26,b.y+22);x.rotate(Math.sin(tick*.09)*.09);x.translate(-b.x-26,-b.y-22)}
+function drawCompanion(b=companion){
+ if(!b)return;
+ x.save();if(isSwimming()){x.translate(b.x+26,b.y+22);x.rotate(Math.sin(tick*.09)*.09);x.translate(-b.x-26,-b.y-22)}
+ if(b===secretCompanion){x.strokeStyle='#f4d77a';x.lineWidth=2;x.beginPath();x.ellipse(b.x+26,b.y-55,13,3,0,0,Math.PI*2);x.stroke()}
  if(b.type==='sponge'){
   sprite('sponge',b.x-3,b.y-13,58,64);x.fillStyle='#412d27';x.fillRect(b.x+7,b.y-16,38,5);x.fillStyle='#b88045';x.fillRect(b.x+7,b.y-16,38*b.cola/100,5);
   if(b.action>0){x.strokeStyle='#e5ca9b';x.lineWidth=2;x.beginPath();x.arc(b.x+26,b.y+19,30,0,Math.PI*2);x.stroke()}

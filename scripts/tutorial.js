@@ -3,7 +3,7 @@ let tutorialCheckpoint=150,tutorialBossRound=1,tutorialPowerSet=0;
 const TUTORIAL_LESSONS=[
  {x:150,title:'Willkommen in Totarial',lines:['A/D oder Pfeile: laufen. Space: springen.','Handy: die großen Tasten unten benutzen.','Esc / II pausiert. Weiter rechts lernst du alles.']},
  {x:650,title:'Springen, Lava und Klippen',lines:['Spring über Lava, Löcher und Stacheln.','Kisten und bewegliche Plattformen tragen dich.','Hier darfst du üben: verlorene Leben kommen zurück.']},
- {x:1400,title:'Gegner und Leben',lines:['Von oben auf Gegner springen: sicherer Stampfer.','Seitlicher Kontakt kostet Leben; Bosse kosten 2.','20 HP, Punkte und Abklingzeit stehen oben.']},
+ {x:1400,title:'Gegner und Leben',lines:['Von oben auf Gegner springen: sicherer Stampfer.','Seitlicher Kontakt kostet Leben; Bosse kosten 2.','20 HP, Punkte und Abklingzeit stehen oben.','Honig-Gegner: seitlicher Kontakt bremst 3 s.']},
  {x:1850,title:'Powers ausprobieren',kind:'powers',lines:['W: Pilz + Kaugummi, Wasabi + Feder, Marshmallow.','1/2 wählt, F benutzt: Pilz heilt, Kaugummi trägt.','Wasabi: 10 s Feuer mit F. Feder: 5 s hohe Sprünge.']},
  {x:2200,title:'Marshmallow und Wind',kind:'wind',lines:['W gibt Marshmallow und startet Übungswind.','F aktiviert 15 s. Beim Fallen Space halten: gleiten.','Wind ab Welt 3: alle 90 s für 5 s, bremst dich.','Mit Marshmallow weht er dich nach hinten!']},
  {x:2400,title:'Spaghetti',kind:'character',value:0,lines:['W wechselt zu Spaghetti. E hängt dich an Haken.','Zweimal schwingen, dann 5 s Abklingzeit.','Space lässt los. A/D gibt Schwung.']},
@@ -22,7 +22,7 @@ const TUTORIAL_LESSONS=[
  {x:4650,title:'Drei Arten von Geheimgang',lines:['Granatapfel öffnet die rissige Wand mit E.','Nicht immer Beute: auch Abkürzung oder Gully.','Probiere die weiteren Wände vor dem Schlüssel.']},
  {x:5650,title:'Käseregen üben',kind:'weather',lines:['W startet hier einen kurzen Übungsschauer.','Welt 3: nach 30 s, dann 30–45 s Pause.','Nur ein kleines Gebiet. Treffer: 0,2 HP.']},
  {x:9180,title:'Abkürzung üben',lines:['Öffne die nächste rissige Wand mit E.','Unten W an der Pfeiltür: weiter vorne raus.','Die Abkürzung enthält nicht automatisch Items.']},
- {x:9470,title:'Geheimer Gully',lines:['Öffne auch diese rissige Wand mit E.','Unten liegt ein versteckter Gully: W hinein.','Jede Welt hat eine andere Kanalisation.']},
+ {x:9470,title:'Geheimer Gully',lines:['Öffne diese rissige Wand mit E, dann W am Gully.','Im Kanal rechts vom Ausgang wartet eine Truhe.','W öffnet sie: Powers, Material oder Heilung.','5 % Chance: zweiter Begleiter bis Levelende!']},
  {x:9790,title:'Wackelpudding',lines:['Ab Welt 4 kann Pudding dich festhalten.','Drücke 6-mal Space / die Sprungtaste.','Gedrückt halten zählt nicht als mehrere Sprünge.']},
  {x:10100,title:'Mond-Schwerkraft üben',kind:'moon',lines:['W schaltet die Mond-Schwerkraft an oder aus.','Auf dem Mond: nur ein Sechstel Schwerkraft.','Sprünge und Fallen dauern deutlich länger.']},
  {x:10250,title:'Die neuen Bosse',lines:['Küche: fliegende Zuckerwatte mit Zuckerwolken.','Eiscreme: Popcorn mit explodierenden Geschossen.','Mond: Triple Bigmac. Alle bei halben HP stärker.','Rote Zielzone: einmal 10 HP, rechtzeitig weg!']}
@@ -67,7 +67,7 @@ function updateTutorial(){
  const lesson=currentTutorialLesson();tutorialCheckpoint=lesson.x;
 }
 function reviveTutorial(){
- player.hp=MAX_HP;player.inv=180;player.slow=0;
+ player.hp=MAX_HP;player.inv=180;player.slow=0;player.honeyTime=0;
  resetTraversalPosition(boss?150:undergroundTrip?150:tutorialCheckpoint,ground);resetCompanion();message='Noch einmal üben – deine Leben sind wieder voll.';
 }
 function drawTutorialMarkers(){

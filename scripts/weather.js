@@ -1,4 +1,4 @@
-// Frequent localized showers: first after 30 seconds, then 30–45 seconds of dry weather.
+// Heavy localized cheese downpour: 30 pieces/second; first at 30 s, dry gaps 30–45 s.
 let kitchenWeather={};
 let worldWind={};
 function resetKitchenWeather(){kitchenWeather={time:0,nextAt:1800,active:false,x:0,w:360,remaining:0,spawnIn:0,practice:false};worldWind={time:0,nextAt:5400,active:false,remaining:0,practice:false}}
@@ -30,7 +30,7 @@ function updateKitchenWeather(){
  if(!kitchenWeather.active&&kitchenWeather.time>=kitchenWeather.nextAt)startCheeseShower(player.x-120+Math.random()*180);
  if(!kitchenWeather.active)return;
  kitchenWeather.remaining--;kitchenWeather.spawnIn--;
- if(kitchenWeather.spawnIn<=0){const px=kitchenWeather.x+Math.random()*(kitchenWeather.w-14);objects.push({type:'cheeseDrop',x:px,y:floorAtX(px)-285,w:14,h:14,vx:0,vy:2.4,life:150});kitchenWeather.spawnIn=30}
+ if(kitchenWeather.spawnIn<=0){const px=kitchenWeather.x+Math.random()*(kitchenWeather.w-14);objects.push({type:'cheeseDrop',x:px,y:floorAtX(px)-285,w:14,h:14,vx:0,vy:2.4,life:150});kitchenWeather.spawnIn=2}
  if(kitchenWeather.remaining<=0){kitchenWeather.active=false;kitchenWeather.practice=false}
 }
 function updateCheeseDrop(o){

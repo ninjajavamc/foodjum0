@@ -26,14 +26,16 @@ function interactWorld(){
  if(player.climbing||nearbyLadder())return;
  if(useSecretExit())return;
  if(interactTutorial())return;
+ if(openSewerTreasure())return;
  const hatch=nearbyManhole();if(hatch){if(undergroundTrip)exitSewer();else enterSewer(hatch);return}
  if(nearbyCatapult())interactCatapult();
 }
 function enterSewer(hatch){
  if(screen!=='play'||boss||undergroundTrip)return;
- undergroundTrip={exitX:hatch.exitX,theme:worldSettings().theme,styleSeed:Math.floor(Math.random()*10000),saved:{levelWidth,doorX,camera,cameraY,objects,enemies,particles,defeated,secretPassages,lavaPits:[...lavaPits],cliffs:[...cliffs],obstacles:[...obstacles],platforms:[...platforms],trees:[...trees],hooks:[...hooks],terraces:[...terraces]}};
+ const reward=hatch.hidden?hiddenSewerReward(hatch):null;
+ undergroundTrip={hatch,hidden:!!hatch.hidden,exitX:hatch.exitX,theme:worldSettings().theme,styleSeed:Math.floor(Math.random()*10000),saved:{levelWidth,doorX,camera,cameraY,objects,enemies,particles,defeated,secretPassages,lavaPits:[...lavaPits],cliffs:[...cliffs],obstacles:[...obstacles],platforms:[...platforms],trees:[...trees],hooks:[...hooks],terraces:[...terraces]}};
  hatch.visited=true;for(const list of [lavaPits,cliffs,obstacles,platforms,trees,hooks,terraces])list.length=0;
- levelWidth=1800;doorX=levelWidth-120;camera=0;cameraY=0;secretPassages=[];particles=[];defeated=[];mandarinBabies=[];objects=[];
+ levelWidth=hatch.hidden?2220:1800;doorX=levelWidth-120;camera=0;cameraY=0;secretPassages=[];particles=[];defeated=[];mandarinBabies=[];objects=[];
  const shift=(level%3)*45,jitter=Math.floor(Math.random()*35),rise=level===5?110:level===4?95:62;
  const obstacleTypes={training:['crate','rock'],forest:['crate','rock'],crystal:['crystalObstacle','crystalObstacle'],kitchen:['pipeBlock','kitchenCan'],frost:['iceBlock','waffleStack'],moon:['satelliteCrate','moonBoulder'],water:['reefBlock','anchorBlock']}[undergroundTrip.theme];
  obstacles.push({type:obstacleTypes[0],x:475+shift+jitter,y:ground-rise,w:70,h:rise},{type:obstacleTypes[1],x:1010-shift,y:ground-90,w:85,h:90});
@@ -43,8 +45,40 @@ function enterSewer(hatch){
  if(level>=4)enemies.push({type:'pudding',x:1280,y:ground-46,w:58,h:46,hp:3,damage:0,vx:0,vy:0,shoot:1000,dead:0,slow:0});
  if(level>=4)enemies.push({type:'taco',x:935,y:ground-42,w:52,h:42,hp:2,damage:1,vx:0,vy:0,shoot:130,dead:0,slow:0});
  if(level>=5)enemies.push({type:'maki',x:1470,y:ground-58,w:48,h:58,hp:2,damage:1,vx:0,vy:0,shoot:1000,dead:0,slow:0});
+ if(reward){const chest={type:'sewerTreasure',x:1950,y:ground-52,w:70,h:52,reward};objects.push(chest);if(reward.collected)addSewerRewardPowers(chest)}
  if(isSwimming())for(const e of enemies){e.y-=100;e.onGround=false}
  resetTraversalPosition(150,ground);if(isSwimming()){player.y-=90;player.onGround=false}resetCompanion();keys={};heldPointers.clear();playSound('menu');message='KANAL · Schimmelkäse & Donuts · Leiter am Ende';
+}
+function hiddenSewerReward(hatch){
+ if(hatch.secretReward)return hatch.secretReward;
+ const roll=Math.random(),choices=BUDDIES.map((_,i)=>i).filter(i=>i!==player.buddyIndex);
+ const kind=roll<.05&&player.secretBuddyIndex==null?'buddy':roll<.35?'powers':roll<.7?'materials':'healing';
+ hatch.secretReward={kind,collected:false,buddyIndex:kind==='buddy'?choices[Math.floor(Math.random()*choices.length)]:null};
+ return hatch.secretReward;
+}
+function nearbySewerTreasure(){return screen==='play'&&undergroundTrip?objects.find(o=>o.type==='sewerTreasure'&&!o.reward.collected&&Math.abs(player.x+player.w/2-o.x-o.w/2)<85&&Math.abs(player.y+player.h-o.y-o.h)<75):null}
+function addSewerRewardPowers(chest){
+ for(const [i,slot] of (chest.reward.powerItems||[]).entries())if(!slot.collected)objects.push({type:'looseItem',item:slot.item,x:chest.x-45+i*115,y:ground-34,w:34,h:34,delay:0,life:Infinity,secretRewardSlot:slot});
+}
+function openSewerTreasure(){
+ const chest=nearbySewerTreasure();if(!chest)return false;
+ const reward=chest.reward;
+ if(reward.kind==='buddy'&&recruitSecretBuddy(reward.buddyIndex))message='Seltener Fund! '+BUDDIES[reward.buddyIndex].name+' begleitet dich zusätzlich!';
+ else if(reward.kind==='materials'){
+  for(const material of ['sugar','wood','spoon'])player.bag[material]=(player.bag[material]||0)+6;
+  message='Geheimschatz: je 6 Zucker, Holz und Löffel!';
+ }else if(reward.kind==='healing'&&player.hp<MAX_HP){player.hp=Math.min(MAX_HP,Math.round((player.hp+5)*100)/100);message='Geheime Heilquelle: +5 HP!'}
+ else{
+  reward.powerItems=(reward.kind==='healing'?['mushroom','mushroom']:['marshmallow','wasabi']).map(item=>({item,collected:false}));addSewerRewardPowers(chest);
+  message='Geheimer Power-Vorrat!';
+ }
+ reward.collected=true;playSound('pickup');particles.push({type:'pickup',art:reward.kind==='buddy'?BUDDIES[reward.buddyIndex].art:reward.kind==='healing'?'mushroom':'marshmallow',x:chest.x+35,y:chest.y-25,vx:0,vy:-.6,age:0,life:60,maxLife:60});return true;
+}
+function drawSewerTreasure(o){
+ x.save();x.fillStyle='#ac7c49';x.strokeStyle='#5b4837';x.lineWidth=3;x.fillRect(o.x,o.y+18,o.w,34);x.strokeRect(o.x,o.y+18,o.w,34);x.fillStyle='#e9c46a';x.fillRect(o.x+10,o.y+18,7,34);x.fillRect(o.x+53,o.y+18,7,34);
+ x.fillStyle=o.reward.collected?'#604f40':'#bf9359';x.beginPath();x.moveTo(o.x,o.y+19);x.quadraticCurveTo(o.x+35,o.y-14,o.x+70,o.y+19);x.closePath();x.fill();x.stroke();
+ if(!o.reward.collected){x.fillStyle='#ffdf80';x.fillRect(o.x+29,o.y+20,12,15);x.strokeRect(o.x+29,o.y+20,12,15);for(let i=0;i<3;i++){const px=o.x+12+i*23,py=o.y-16+Math.sin(tick*.08+i)*4;x.beginPath();x.moveTo(px-4,py);x.lineTo(px+4,py);x.moveTo(px,py-4);x.lineTo(px,py+4);x.strokeStyle='#ffe5a0';x.stroke()}}
+ x.fillStyle='#f6dfa0';x.textAlign='center';x.font='bold 13px system-ui';x.fillText(o.reward.collected?'Schatz geöffnet':o.reward.kind==='buddy'?'Seltener Begleiter':'Geheimschatz',o.x+35,o.y-37);x.restore();
 }
 function resetTraversalPosition(px,surface){
  player.trappedIn=null;player.escapeJumps=0;player.puddingImmunity=45;player.x=px;player.y=surface-player.h;player.vx=0;player.vy=0;player.onGround=true;player.swing=null;player.climbing=null;player.seatedCatapult=null;player.launchFrames=0;player.ladderDetach=0;player.bubble=0;player.inv=Math.max(player.inv,90);
