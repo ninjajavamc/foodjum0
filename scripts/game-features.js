@@ -85,6 +85,14 @@ function updateMarshmallowGlide(){
  p.gliding=p.marshmallowTime>0&&!isSwimming()&&!p.swing&&!p.climbing&&!p.seatedCatapult&&!p.trappedIn&&p.bubble<=0&&p.vy>0&&!!(keys[' ']||keys.touchJump);
  if(p.gliding)p.vy=Math.min(p.vy,Math.max(.35,worldGravity()*2.2));
 }
+function drawPlayerPowerIcons(){
+ if(screen!=='play')return;
+ const icons=[];if(player.fireTime>0)icons.push('chili');if(player.marshmallowTime>0)icons.push('marshmallow');
+ for(let i=0;i<icons.length;i++)sprite(icons[i],player.x+player.w/2-12+(i-(icons.length-1)/2)*29,player.y-42+Math.sin(tick*.09+i)*3,24,31);
+}
+function drawChiliFallback(left,top,width,height){
+ x.save();x.translate(left,top);x.scale(width/128,height/160);x.fillStyle='#df5e47';x.strokeStyle='#8e3f32';x.lineWidth=3;x.beginPath();x.moveTo(82,38);x.quadraticCurveTo(119,110,21,144);x.quadraticCurveTo(61,93,54,46);x.closePath();x.fill();x.stroke();x.strokeStyle='#609250';x.lineWidth=8;x.beginPath();x.moveTo(66,42);x.quadraticCurveTo(65,16,86,15);x.stroke();x.restore();
+}
 function drawMarshmallowEffect(){
  if(player.honeyTime>0&&screen==='play'){x.save();x.fillStyle='rgba(239,183,62,.65)';x.strokeStyle='#b98934';x.lineWidth=1.5;for(const dx of [8,29]){x.beginPath();x.ellipse(player.x+dx,player.y+player.h-3,9,4,0,0,Math.PI*2);x.fill();x.stroke()}x.restore()}
  if(!player.gliding||screen!=='play')return;
@@ -162,14 +170,16 @@ function drawExtraTerrain(){
  x.save();
  for(const cliff of cliffs){
   if(cliff.x+cliff.w<camera-50||cliff.x>camera+W+50)continue;
+  if(isCloudWorld()){drawCloudGap(cliff);continue}
   x.fillStyle='#263b52';x.fillRect(cliff.x,cliff.y,cliff.w,WORLD_BOTTOM-cliff.y);x.strokeStyle='#826f67';x.lineWidth=5;
   for(const edge of [cliff.x,cliff.x+cliff.w]){x.beginPath();x.moveTo(edge,cliff.y);x.lineTo(edge,cliff.y+28);x.lineTo(edge+(edge===cliff.x?-8:8),cliff.y+45);x.lineTo(edge,cliff.y+68);x.stroke()}
   x.fillStyle='#7192a0';x.beginPath();x.moveTo(cliff.x+15,cliff.y+180);x.lineTo(cliff.x+cliff.w/2,cliff.y+150);x.lineTo(cliff.x+cliff.w-10,cliff.y+180);x.fill();
  }
- for(const p of platforms)if(p.moving&&p.x+p.w>camera-50&&p.x<camera+W+50){x.fillStyle='#cdab7b';x.strokeStyle='#684c3f';x.lineWidth=3;x.fillRect(p.x,p.y,p.w,p.h);x.strokeRect(p.x,p.y,p.w,p.h)}
+ for(const p of platforms)if(p.moving&&p.x+p.w>camera-50&&p.x<camera+W+50){if(drawCloudPlatform(p))continue;x.fillStyle='#cdab7b';x.strokeStyle='#684c3f';x.lineWidth=3;x.fillRect(p.x,p.y,p.w,p.h);x.strokeRect(p.x,p.y,p.w,p.h)}
  for(const o of obstacles){
   if(o.x+o.w<camera-50||o.x>camera+W+50)continue;
   if(undergroundTrip&&drawSewerObstacle(o))continue;
+  if(drawCloudObstacle(o))continue;
   if(o.type==='spikes'){
    for(let i=0;i<o.w;i+=12){x.fillStyle='#d2dde2';x.strokeStyle='#4c6776';x.lineWidth=2;x.beginPath();x.moveTo(o.x+i,o.y+o.h);x.lineTo(o.x+i+6,o.y);x.lineTo(o.x+i+12,o.y+o.h);x.closePath();x.fill();x.stroke()}
   }else{

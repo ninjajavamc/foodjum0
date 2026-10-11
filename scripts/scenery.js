@@ -5,6 +5,7 @@ async function toggleFullscreen(){
 function drawBackground(){
  if(undergroundTrip&&!['start','levelselect','choose','buddy'].includes(screen)){drawSewerBackground();return}
  if(isTutorial()&&!MENU_MUSIC_SCREENS.has(screen)){drawTrainingBackground();return}
+ if(worldSettings().theme==='cloud'&&!MENU_MUSIC_SCREENS.has(screen)){drawCloudBackground();return}
  if(worldSettings().theme==='water'&&!MENU_MUSIC_SCREENS.has(screen)){drawWaterBackground();return}
  if(worldSettings().theme==='moon'&&!MENU_MUSIC_SCREENS.has(screen)){drawMoonBackground();return}
  if(worldSettings().theme==='frost'&&!MENU_MUSIC_SCREENS.has(screen)){drawFrostBackground();return}
@@ -28,6 +29,7 @@ function drawBackground(){
  }
 }
 function drawWorldTree(tree){
+ if(worldSettings().theme==='cloud'){drawCloudProp(tree);return}
  if(worldSettings().theme==='crystal'){drawCrystalSpire(tree);return}
  if(worldSettings().theme==='kitchen'){drawKitchenProp(tree);return}
  if(worldSettings().theme==='frost'){drawIceCreamTree(tree);return}
@@ -55,6 +57,7 @@ function drawWorldTree(tree){
 }
 function drawGrassStrip(left,right,surface){
  const from=Math.max(left,camera-90),to=Math.min(right,camera+W+90);
+ if(worldSettings().theme==='cloud'){drawCloudSurface(from,to,surface);return}
  if(worldSettings().theme==='crystal'){
   x.fillStyle='#f5daa0';x.fillRect(from,surface,to-from,13);x.strokeStyle='#d7b77a';x.lineWidth=1.5;
   for(let px=Math.ceil(from/31)*31;px<to;px+=31){x.beginPath();x.moveTo(px-8,surface+5);x.quadraticCurveTo(px,surface+Math.sin(px)*2+2,px+9,surface+5);x.stroke();x.fillStyle='#bda06a';x.fillRect(px+5,surface+9,2,1)}return;

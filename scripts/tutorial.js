@@ -25,7 +25,7 @@ const TUTORIAL_LESSONS=[
  {x:9470,title:'Geheimer Gully',lines:['Öffne diese rissige Wand mit E, dann W am Gully.','Im Kanal rechts vom Ausgang wartet eine Truhe.','W öffnet sie: Powers, Material oder Heilung.','5 % Chance: zweiter Begleiter bis Levelende!']},
  {x:9790,title:'Wackelpudding',lines:['Ab Welt 4 kann Pudding dich festhalten.','Drücke 6-mal Space / die Sprungtaste.','Gedrückt halten zählt nicht als mehrere Sprünge.']},
  {x:10100,title:'Mond-Schwerkraft üben',kind:'moon',lines:['W schaltet die Mond-Schwerkraft an oder aus.','Auf dem Mond: nur ein Sechstel Schwerkraft.','Sprünge und Fallen dauern deutlich länger.']},
- {x:10250,title:'Die neuen Bosse',lines:['Küche: fliegende Zuckerwatte mit Zuckerwolken.','Eiscreme: Popcorn mit explodierenden Geschossen.','Mond: Triple Bigmac. Alle bei halben HP stärker.','Rote Zielzone: einmal 10 HP, rechtzeitig weg!']}
+ {x:10250,title:'Die neuen Bosse',lines:['Küche: Gewitter-Croissant mit Blitzgeschossen.','Wolken-Bäckerei: fliegende Zuckerwatte.','Popcorn, Triple Bigmac, Fischstäbchen: weitere Bosse.','Rote Zielzone: einmal 10 HP, rechtzeitig weg!']}
 ].sort((a,b)=>a.x-b.x);
 function spawnTutorial(){
  tutorialCheckpoint=150;tutorialBossRound=1;tutorialPowerSet=0;

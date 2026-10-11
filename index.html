@@ -19,29 +19,30 @@
 <button id="fullscreenToggle" onclick="toggleFullscreen()">Vollbild</button>
 <div id="hint">PC: A/D oder ←/→ zum Laufen · Leertaste zum Springen · E / ★ Spezial · F / ITEM benutzen · 1–5 Inventare · I Inventar · B Werkbank · Esc Pause · R Ablegen · W Nutzen / Klettern · S Leiter runter</div>
 <a id="credits" href="credits.html" target="_blank">Bildquellen</a>
-<script src="scripts/audio.js"></script>
-<script src="scripts/worlds.js"></script>
-<script src="scripts/world-art.js"></script>
-<script src="scripts/kitchen-art.js"></script>
-<script src="scripts/frost-art.js"></script>
-<script src="scripts/moon-art.js"></script>
-<script src="scripts/underwater.js"></script>
-<script src="scripts/pudding.js"></script>
-<script src="scripts/weather.js"></script>
-<script src="scripts/game-features.js"></script>
-<script src="scripts/companions.js"></script>
-<script src="scripts/crafting.js"></script>
-<script src="scripts/scenery.js"></script>
-<script src="scripts/abilities.js"></script>
-<script src="scripts/structures.js"></script>
-<script src="scripts/traversal.js"></script>
-<script src="scripts/sewers.js"></script>
-<script src="scripts/menus.js"></script>
-<script src="scripts/bosses.js"></script>
-<script src="scripts/boss-moves.js"></script>
-<script src="scripts/dessert-bosses.js"></script>
-<script src="scripts/secrets.js"></script>
-<script src="scripts/tutorial.js"></script>
+<script src="scripts/audio.js?v=cloud7"></script>
+<script src="scripts/worlds.js?v=cloud7"></script>
+<script src="scripts/world-art.js?v=cloud7"></script>
+<script src="scripts/kitchen-art.js?v=cloud7"></script>
+<script src="scripts/frost-art.js?v=cloud7"></script>
+<script src="scripts/moon-art.js?v=cloud7"></script>
+<script src="scripts/underwater.js?v=cloud7"></script>
+<script src="scripts/clouds.js?v=cloud7"></script>
+<script src="scripts/pudding.js?v=cloud7"></script>
+<script src="scripts/weather.js?v=cloud7"></script>
+<script src="scripts/game-features.js?v=cloud7"></script>
+<script src="scripts/companions.js?v=cloud7"></script>
+<script src="scripts/crafting.js?v=cloud7"></script>
+<script src="scripts/scenery.js?v=cloud7"></script>
+<script src="scripts/abilities.js?v=cloud7"></script>
+<script src="scripts/structures.js?v=cloud7"></script>
+<script src="scripts/traversal.js?v=cloud7"></script>
+<script src="scripts/sewers.js?v=cloud7"></script>
+<script src="scripts/menus.js?v=cloud7"></script>
+<script src="scripts/bosses.js?v=cloud7"></script>
+<script src="scripts/boss-moves.js?v=cloud7"></script>
+<script src="scripts/dessert-bosses.js?v=cloud7"></script>
+<script src="scripts/secrets.js?v=cloud7"></script>
+<script src="scripts/tutorial.js?v=cloud7"></script>
 <script>
 const c=document.querySelector('#game'), x=c.getContext('2d');
 const W=c.width,H=c.height,ground=525,MAX_HP=20,WORLD_BOTTOM=1100;
@@ -93,7 +94,7 @@ function spawnLevel(){
   enemies.push({type,x:pos,y:floorAtX(pos)-(type==='maki'?58:type==='pudding'?46:42),w:type==='maki'?48:type==='pudding'?58:type==='taco'?52:42,h:type==='maki'?58:type==='pudding'?46:42,hp:(type==='taco'||type==='maki')?2:type==='pudding'?3:type==='honey'?(level>=3?3:2):level>=2&&type==='lemon'?2:1,damage:1,vx:0,vy:0,shoot:150+Math.random()*100,dead:0,slow:0});
   if(type==='lemon'){const bottleX=safeColaX(pos-105);if(bottleX!==null)objects.push({type:'cola',x:bottleX,y:floorAtX(bottleX)-145,w:64,h:145,liquid:.9,used:false})}
  }
- generateSecretPassages();generateGreatWalls();generateManholes();
+ generateSecretPassages();generateGreatWalls();generateManholes();decorateCloudWorld();
  if(isSwimming()){addWaterHealingMushrooms();player.y-=90;player.onGround=false;for(const e of enemies){e.y-=90+(e.x%110);e.onGround=false}}
  resetCompanion();
 }
@@ -131,7 +132,7 @@ function update(){
  if(screen!=='play')return;
  updateDefeated();updateParticles();tick++;
  for(const platform of platforms)if(platform.moving)platform.y=platform.baseY+Math.sin(tick*.02+platform.phase)*22;
- updatePlacedLadders();updateKitchenWeather();updateWorldWind();
+ updateCloudPlatforms();updateCloudWeather();updatePlacedLadders();updateKitchenWeather();updateWorldWind();
  let p=player;const previousX=p.x,previousBottom=p.y+p.h;
  if(p.swingCooldown>0){p.swingCooldown--;if(p.swingCooldown===0)p.swingsUsed=0}
  p.cooldown=Math.max(0,p.cooldown-1);p.inv=Math.max(0,p.inv-1);p.shield=Math.max(0,p.shield-1);p.slow=Math.max(0,p.slow-1);p.honeyTime=Math.max(0,(p.honeyTime||0)-1);if(p.bubble===1)popBubble();p.bubble=Math.max(0,p.bubble-1);p.fireTime=Math.max(0,p.fireTime-1);p.fireCooldown=Math.max(0,p.fireCooldown-1);p.jumpBoost=Math.max(0,p.jumpBoost-1);p.marshmallowTime=Math.max(0,(p.marshmallowTime||0)-1);p.gliding=false;
@@ -173,7 +174,7 @@ function update(){
   if(o.type==='bananaBoomerang')updateBananaBoomerang(o);
   if(o.type==='catapult')updateCatapult(o);
   if(o.type==='catapultRock')updateCatapultRock(o);
-  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot'].includes(o.type))updateBossProjectile(o);
+  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot','stormBolt'].includes(o.type))updateBossProjectile(o);
   if(o.type==='cheeseDrop')updateCheeseDrop(o);
   if(o.type==='material')collectWorldLoot(o);
   if(o.type==='looseItem')updateLooseItem(o);
@@ -249,13 +250,14 @@ function update(){
  const targetY=boss&&level!==5?0:Math.min(floorAtX(p.x+p.w/2)-ground,p.y-170);cameraY+=(targetY-cameraY)*.1;
 }
 const art={};
-for(const name of ['spaghetti','mandarine','banane','kartoffel','granatapfel','honey','lemon','peel','cola','hat','door','boss','gummy','lunchbox','mushroom','gum','wasabi','mandarin-piece','sponge','sausage-dog','key','toothpaste','toothbrush','material-sugar','material-herbs','material-spice','material-stone','material-spoon','material-wood','catapultKit','wallKit','boss-fork','boss-spoon','boss-knife','springKit','secret-wall','ladderKit','moldCheese','donut','boss-cotton','boss-popcorn','boss-bigmac','pudding','taco','boss-fishstick','maki','marshmallow']){
- const image=new Image(); image.src='assets/sprites/'+name+'.svg'; art[name]=image;
+for(const name of ['spaghetti','mandarine','banane','kartoffel','granatapfel','honey','lemon','peel','cola','hat','door','boss','gummy','lunchbox','mushroom','gum','wasabi','mandarin-piece','sponge','sausage-dog','key','toothpaste','toothbrush','material-sugar','material-herbs','material-spice','material-stone','material-spoon','material-wood','catapultKit','wallKit','boss-fork','boss-spoon','boss-knife','springKit','secret-wall','ladderKit','moldCheese','donut','boss-cotton','boss-popcorn','boss-bigmac','pudding','taco','boss-fishstick','maki','marshmallow','boss-croissant','chili']){
+ const image=new Image(); image.src='assets/sprites/'+name+'.svg?v=cloud7'; art[name]=image;
 }
 function sprite(name,left,top,width,height){
  const image=art[name];
  if(image&&image.complete&&image.naturalWidth)x.drawImage(image,left,top,width,height);
- else if(['pudding','boss-cotton','boss-popcorn','boss-bigmac'].includes(name))drawDessertFallback(name,left,top,width,height);
+ else if(['pudding','boss-cotton','boss-popcorn','boss-bigmac','boss-croissant'].includes(name))drawDessertFallback(name,left,top,width,height);
+ else if(name==='chili')drawChiliFallback(left,top,width,height);
  else if(name==='marshmallow')drawMarshmallowFallback(left,top,width,height);
  else if(['taco','boss-fishstick','maki'].includes(name))drawAquaticFallback(name,left,top,width,height);
 }
@@ -315,6 +317,7 @@ function drawScenery(){
  }
  if(!boss)for(const p of platforms){
   if(p.moving||p.x+p.w<camera-30||p.x>camera+W+30)continue;
+  if(drawCloudPlatform(p))continue;
   x.fillStyle='#9a9f9d';x.strokeStyle='#4f5c58';x.lineWidth=3;x.beginPath();x.moveTo(p.x,p.y+p.h);x.lineTo(p.x+7,p.y+10);x.lineTo(p.x+18,p.y);x.lineTo(p.x+p.w-18,p.y);x.lineTo(p.x+p.w-4,p.y+13);x.lineTo(p.x+p.w,p.y+p.h);x.closePath();x.fill();x.stroke();
   x.strokeStyle='#c9d0c8';x.beginPath();x.moveTo(p.x+18,p.y+8);x.lineTo(p.x+p.w-23,p.y+8);x.stroke();
  }
@@ -356,7 +359,7 @@ function drawGame(){
   if(o.type==='buddyCola')drawBuddyCola(o);
   if(o.type==='buddyFoam')drawBuddyFoam(o);
   if(o.type==='bananaBoomerang')drawBananaBoomerang(o);
-  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot'].includes(o.type))drawBossProjectile(o);
+  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot','stormBolt'].includes(o.type))drawBossProjectile(o);
   if(['catapult','stonewall','greatWall','ladder','sewerLadder','catapultRock'].includes(o.type))drawStructure(o);
   if(['manhole','manholeOutlet','sewerExit'].includes(o.type))drawManhole(o);
   if(o.type==='cheeseDrop')drawCheeseDrop(o);
@@ -384,11 +387,11 @@ function drawGame(){
   else if(isSwimming())drawSwimmingSprite(chars[selected].art,player.x-8,player.y-15,59,77);
   else drawWalkingSprite(chars[selected].art,player.x-8,player.y-15,59,77,player.walkPhase,!!player.climbing||(player.onGround&&Math.abs(player.vx)>.1));
  }
- drawMarshmallowEffect();
+ drawPlayerPowerIcons();drawMarshmallowEffect();
  if(player.bubble>0&&screen==='play'){x.fillStyle='rgba(244,165,207,.22)';x.strokeStyle='#f9c6e3';x.lineWidth=3;x.beginPath();x.arc(player.x+22,player.y+26,43,0,Math.PI*2);x.fill();x.stroke();x.strokeStyle='#fff';x.beginPath();x.arc(player.x+22,player.y+26,34,Math.PI*1.1,Math.PI*1.5);x.stroke()}
  if(player.shield&&screen==='play'){x.strokeStyle='#fff';x.lineWidth=3;x.beginPath();x.arc(player.x+22,player.y+28,39,0,7);x.stroke()}
  x.restore();
- drawWorldWind();
+ drawWorldWind();drawCloudRain();
  if(screen==='play')drawTutorialPanel();
  // mobile controls (screen coordinates, independent of camera)
  buttons=[{id:'left',x:25,y:H-85,w:64,h:55,label:'←'},{id:'right',x:98,y:H-85,w:64,h:55,label:'→'},{id:'item',x:W-246,y:H-85,w:64,h:55,label:'F'},{id:'jump',x:W-170,y:H-85,w:64,h:55,label:'↑'},{id:'ability',x:W-94,y:H-85,w:70,h:55,label:'★'}];

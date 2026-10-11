@@ -8,6 +8,7 @@ const canvasContext=new Proxy({
  measureText:t=>({width:t.length*7}),
  createLinearGradient:()=>({addColorStop(){}}),
  createRadialGradient:()=>({addColorStop(){}}),
+ ellipse:(...args)=>assert(args.length>=7&&args.every(Number.isFinite)&&args[2]>=0&&args[3]>=0,'Canvas ellipse needs seven finite arguments and non-negative radii'),
  arc:(cx,cy,r)=>assert(Number.isFinite(r)&&r>=0,'Canvas circle radius must never be negative')
 },{get:(obj,key)=>key in obj?obj[key]:()=>{}});
 const handlers={global:{},canvas:{}};
@@ -21,7 +22,7 @@ const context=vm.createContext({
  addEventListener:(event,fn)=>handlers.global[event]=fn,
  requestAnimationFrame(){},performance:{now:()=>1000},console
 });
-for(const path of ['scripts/audio.js','scripts/worlds.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
+for(const path of ['scripts/audio.js','scripts/worlds.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/clouds.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
 vm.runInContext(script,context);
 const run=code=>vm.runInContext(code,context);
 for(const name of run('Object.keys(art)')){
@@ -319,7 +320,7 @@ assert(run('objects.some(o=>o.type===\"material\"&&o.quantity===3&&o.y>secret.ba
 run('player.inv=10000;keys.d=true;for(let i=0;i<45;i++)update();keys={}');
 assert(run('player.x>secret.x&&player.y+player.h>secret.base+60'),'Opened passage can actually be entered by walking and falling');
 run('reset()');assert(run('secretPassages.every(s=>!s.open)'),'New level restores hidden passages correctly');
-for(const asset of run('Object.values(art).map(image=>image.src)'))assert(fs.existsSync(asset),'Every loaded sprite exists: '+asset);
+for(const asset of run('Object.values(art).map(image=>image.src)'))assert(fs.existsSync(asset.split('?')[0]),'Every loaded sprite exists: '+asset);
 run('reset();var giant=objects.find(o=>o.type===\"greatWall\");var hatch=objects.find(o=>o.type===\"manhole\")');
 assert(run('giant&&giant.h>=380&&giant.h<=414'),'Generated maps contain rare genuinely tall walls');
 assert(run('hatch&&hatch.exitX>hatch.x+900'),'Manholes connect distinct safe world positions');
@@ -377,7 +378,7 @@ for(let i=0;i<4;i++){run('selectedLevel=1;reset()');assert(run('levelWidth===900
 run('screen=\"start\";draw()');assert(run('menuButtons.some(b=>b.id===\"levels\")&&menuButtons.find(b=>b.id===\"multiplayer\").disabled'),'Start screen offers levels and disabled upcoming multiplayer');
 handlers.canvas.pointerdown({pointerId:100,clientX:500,clientY:370,preventDefault(){}});assert.equal(run('screen'),'start','Multiplayer is not misleadingly playable');
 handlers.canvas.pointerdown({pointerId:101,clientX:500,clientY:275,preventDefault(){}});assert.equal(run('screen'),'levelselect','Level selection comes before characters');
-handlers.canvas.pointerdown({pointerId:102,clientX:500,clientY:350,preventDefault(){}});assert(run('screen===\"choose\"&&selectedLevel===2'),'Choosing Level 2 leads to character selection');
+run('draw();var secondWorldCard=menuButtons.find(b=>b.id==="level2")');handlers.canvas.pointerdown({pointerId:102,clientX:run('secondWorldCard.x+secondWorldCard.w/2'),clientY:run('secondWorldCard.y+secondWorldCard.h/2'),preventDefault(){}});assert(run('screen===\"choose\"&&selectedLevel===2'),'Choosing Level 2 leads to character selection');
 handlers.global.keydown({key:'Enter',repeat:false,preventDefault(){}});assert.equal(run('screen'),'buddy','Character selection is followed by companion selection');
 handlers.global.keydown({key:'Enter',repeat:false,preventDefault(){}});assert(run('screen===\"play\"&&level===2&&levelWidth===10500&&enemies.length===14'),'The selected shortened Level 2 starts after choosing a companion');
 run('screen=\"over\";draw()');assert(run('overButtons.some(b=>b.id===\"retry\")&&overButtons.some(b=>b.id===\"menu\")'),'Game over offers both replay and main menu');
@@ -485,7 +486,7 @@ handlers.global.keydown({key:'ArrowRight',repeat:false,preventDefault(){}});asse
 handlers.global.keydown({key:'3',repeat:false,preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===3'),'Keyboard 3 selects Kitchen');
 handlers.global.keydown({key:'Enter',repeat:false,preventDefault(){}});handlers.global.keydown({key:'Enter',repeat:false,preventDefault(){}});assert(run('screen==="play"&&level===3&&!boss'),'Kitchen starts after selecting a character and companion');
 run('player.x=doorX+15;player.y=ground-player.h;player.hasKey=false;openBossDoor()');assert.equal(run('screen'),'play','Kitchen end still requires collecting its key');
-run('player.hasKey=true;openBossDoor();draw()');assert(run('screen==="play"&&boss.art==="boss-cotton"&&boss.flying'),'Kitchen now starts its flying cotton-candy boss');
+run('player.hasKey=true;openBossDoor();draw()');assert(run('screen==="play"&&boss.art==="boss-croissant"&&boss.flying'),'Kitchen now starts its flying storm-croissant boss');
 run('boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert(run('screen==="victory"&&!victoryButtons.find(b=>b.id==="next").disabled'),'Kitchen victory unlocks the ice-cream world');
 run('victoryAction("retry")');assert(run('screen==="play"&&level===3&&player.hp===20'),'Kitchen replay remains in World 3');
 run('selectedLevel=2;reset();startBoss();boss.members.forEach(b=>b.hp=0);for(let i=0;i<76;i++)update();victoryAction("next")');assert(run('screen==="play"&&level===3&&worldSettings().theme==="kitchen"'),'Beating the trio progresses to Kitchen');
@@ -509,7 +510,7 @@ assert(run('LEVEL_SETTINGS[1].width===12000*.75&&LEVEL_SETTINGS[2].width===14000
 for(const world of [1,2,3]){run('selectedLevel='+world+';reset();var safeKey=objects.find(o=>o.type==="key")');assert(run('[...lavaPits,...cliffs].every(g=>safeKey.x+safeKey.w<=g.x||safeKey.x>=g.x+g.w)'),'The shortened world '+world+' has a safely reachable key')}
 run('selectedBuddy=0;selectedLevel=1;reset()');
 // New worlds are directly accessible, not merely progression placeholders.
-run('screen="levelselect";draw()');assert(run('menuButtons.filter(b=>/^level[1-6]$/.test(b.id)).length===6'),'All six world cards are visible');
+run('screen="levelselect";draw()');assert(run('menuButtons.filter(b=>/^level[1-7]$/.test(b.id)).length===7'),'All seven world cards are visible');
 for(const world of [4,5]){handlers.global.keydown({key:String(world),repeat:false,preventDefault(){}});assert(run('selectedLevel==='+world+'&&screen==="choose"'),'Keyboard selects the new world '+world);run('reset();draw()');assert(run('enemies.some(e=>e.type==="pudding")'),'Pudding appears from World 4 onward');run('screen="levelselect"')}
 run('selectedLevel=5;reset();enemies=[];objects=[];lavaPits.length=0;cliffs.length=0;obstacles.length=0;platforms.length=0;terraces.length=0;player.x=500;player.y=ground-player.h;player.onGround=true;jump();var moonFrames=0,moonPeak=player.y;while(!player.onGround&&moonFrames<200){update();moonPeak=Math.min(moonPeak,player.y);moonFrames++}draw()');
 assert(run('Math.abs(worldGravity()-.58/6)<1e-9&&moonFrames>130&&moonFrames<180&&ground-player.h-moonPeak>260'),'Moon has one-sixth gravity, higher jumps and slow falling');
@@ -527,17 +528,18 @@ run('for(let i=0;i<600;i++)updateKitchenWeather()');assert(run('!kitchenWeather.
 run('var kitchenTime=kitchenWeather.time;enterSewer({exitX:2500});for(let i=0;i<120;i++)updateKitchenWeather();exitSewer()');assert.equal(run('kitchenWeather.time'),run('kitchenTime'),'Kitchen rain does not run underground');
 for(const world of [1,2,4,5]){run('selectedLevel='+world+';reset();for(let i=0;i<4000;i++)updateKitchenWeather()');assert(run('!kitchenWeather.active'),'Cheese rain is exclusive to Kitchen, apart from the training exercise')}
 // Every boss has its own body/attacks and one avoidable half-HP special.
-for(const world of [3,4,5]){
+for(const world of [3,4,5,7]){
  run('selectedLevel='+world+';reset();startBoss();player.inv=100000;var bossStartY=boss.y;for(let i=0;i<180;i++){update();draw()}');
- assert(run('boss.art==='+JSON.stringify({3:'boss-cotton',4:'boss-popcorn',5:'boss-bigmac'}[world])),'The correct boss starts in World '+world);
- if(world===3)assert(run('boss.flying&&boss.y!==bossStartY&&boss.y+boss.h<ground&&objects.some(o=>o.type==="sugarPuff")'),'Cotton candy flies and fires sugar puffs');
+ assert(run('boss.art==='+JSON.stringify({3:'boss-croissant',4:'boss-popcorn',5:'boss-bigmac',7:'boss-cotton'}[world])),'The correct boss starts in World '+world);
+ if(world===3)assert(run('boss.flying&&boss.y!==bossStartY&&boss.y+boss.h<ground&&objects.some(o=>o.type==="stormBolt")'),'Kitchen croissant flies and fires lightning');
+ if(world===7)assert(run('boss.flying&&boss.max===70&&boss.y!==bossStartY&&objects.some(o=>o.type==="sugarPuff")'),'Cloud cotton candy flies and fires sugar puffs');
  if(world===4)assert(run('objects.some(o=>o.type==="explosivePopcorn")'),'Popcorn shoots explosive kernels');
  if(world===5)assert(run('objects.some(o=>o.type==="pickleShot")'),'Triple Bigmac shoots its own projectiles');
  run('boss.hp=boss.max/2;updateBossFight(player.y+player.h)');assert(run('boss.phase===2&&boss.heavyCharge===89&&boss.heavyUsed'),'Half HP starts the telegraphed special');
  run('for(let i=0;i<89;i++)updateBossSpecial();var special=objects.find(o=>o.type==="bossHeavyWave");player.x=special.x+special.w/2-player.w/2;player.y=ground-player.h;player.hp=20;player.inv=0;updateBossProjectile(special)');assert.equal(run('player.hp'),10,'The marked special deals 10 HP in World '+world);
  run('player.inv=100000;for(let i=0;i<300;i++)updateBossFight(player.y+player.h)');assert.equal(run('boss.heavyCount'),1,'The powerful special is used only once per fight');
  run('boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert.equal(run('screen'),'victory','The new boss can be defeated');
- assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),world===6,'Only the final world disables further progression');
+ assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),world===7,'Only the final world disables further progression');
 }
 run('selectedLevel=4;reset();startBoss();objects=[];fireExplosivePopcorn(boss);var kernel=objects[0];kernel.x=player.x;kernel.y=player.y;kernel.fuse=1;player.hp=20;player.inv=0;updateBossProjectile(kernel);var blast=objects.find(o=>o.type==="popcornBlast");drawBossProjectile(blast);updateBossProjectile(blast)');assert(run('kernel.exploded&&kernel.life===0&&player.hp===18'),'Explosive popcorn creates a real 2-HP blast');
 run('player.hp=20;player.inv=0;player.x=blast.cx+blast.radius+20;updateBossProjectile({...blast,life:14})');assert.equal(run('player.hp'),20,'Moving beyond the blast radius avoids popcorn damage');
@@ -561,14 +563,14 @@ run('player.inventory=[];player.bag={spoon:10,wood:10,stone:10};openWorkbench();
 run('toggleInventory();for(let i=0;i<150;i++){player.inventory=[];collectLunchbox({x:500,y:400,w:64,h:50});if(player.inventory.includes("springKit"))throw Error("Forbidden Moon loot")}');
 run('player.inventory=["springKit","gum"];player.jumpBoost=100;enforceMoonItemRules()');assert(run('player.jumpBoost===0&&player.inventory.length===1&&player.inventory[0]==="gum"'),'Entering Moon removes carried springs and active spring effects');
 const sewerObstacleKinds=[];for(const world of [1,2,3,4,5]){run('selectedLevel='+world+';reset();enterSewer({exitX:2500});draw()');sewerObstacleKinds.push(run('obstacles.map(o=>o.type).join(",")'));run('exitSewer()')}assert.equal(new Set(sewerObstacleKinds).size,5,'Every real-world sewer has different actual obstacle types');
-for(const name of ['pudding','boss-cotton','boss-popcorn','boss-bigmac'])run('drawDessertFallback('+JSON.stringify(name)+',100,100,90,120)');
+for(const name of ['pudding','boss-cotton','boss-popcorn','boss-bigmac','boss-croissant'])run('drawDessertFallback('+JSON.stringify(name)+',100,100,90,120)');
 // Aquatic world, taco enemies and permanently marked entrance hatches.
 run('screen="levelselect";selectedLevel=5;draw()');handlers.global.keydown({key:'ArrowRight',repeat:false,preventDefault(){}});assert.equal(run('selectedLevel'),6,'Arrow navigation reaches Underwater');
 handlers.global.keydown({key:'6',repeat:false,preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===6'),'Keyboard 6 selects Underwater');
 run('reset();draw()');assert(run('levelWidth===9667&&enemies.length===21&&isSwimming()'),'Underwater is one-third shorter with adjusted enemy density');
 assert(run('objects.filter(o=>o.waterHealing).length>=6'),'The shortened underwater map has many extra healing mushrooms');
 assert(run('objects.filter(o=>o.waterHealing).every(o=>![...lavaPits,...cliffs].some(g=>o.x+o.w>g.x&&o.x<g.x+g.w)&&!solidTerrain().some(s=>rect(o,s)))'),'Extra mushrooms are placed safely');
-run('screen="levelselect";draw()');handlers.canvas.pointerdown({pointerId:309,clientX:765,clientY:480,preventDefault(){}});assert(run('selectedLevel===6&&screen==="choose"'),'Touch selects the underwater card');
+run('screen="levelselect";draw();var waterCard=menuButtons.find(b=>b.id==="level6")');handlers.canvas.pointerdown({pointerId:309,clientX:run('waterCard.x+waterCard.w/2'),clientY:run('waterCard.y+waterCard.h/2'),preventDefault(){}});assert(run('selectedLevel===6&&screen==="choose"'),'Touch selects the underwater card');
 run('selectedLevel=6;reset();enemies=[];objects=[];obstacles.length=0;platforms.length=0;lavaPits.length=0;cliffs.length=0;terraces.length=0;player.x=500;player.y=340;player.inv=10000;keys={w:true};for(let i=0;i<50;i++)update();var upperSwimY=player.y;draw()');assert(run('player.y<240&&!player.onGround'),'W swims upward in midwater');
 run('keys={s:true};for(let i=0;i<80;i++)update()');assert(run('player.y>upperSwimY+90'),'S dives down');
 run('keys={};player.y=300;player.vy=0;for(let i=0;i<60;i++)update()');assert(run('player.y<320&&!player.onGround'),'Neutral swimming sinks only gently, rather than using land gravity');run('jump()');assert(run('player.vy<0&&!player.onGround'),'Space gives a swimming stroke without needing ground');
@@ -576,7 +578,7 @@ run('keys={w:true};for(let i=0;i<200;i++)update()');assert(run('player.y>=WATER_
 run('keys={s:true};for(let i=0;i<200;i++)update();keys={};draw()');assert(run('player.y+player.h<=ground+.01&&buttons.some(b=>b.id==="climbUp")&&buttons.some(b=>b.id==="climbDown")'),'Water has a bottom boundary and permanent up/down touch controls');
 for(let buddy=0;buddy<4;buddy++){run('selectedBuddy='+buddy+';selectedLevel=6;reset();objects=[];enemies=[];obstacles.length=0;platforms.length=0;lavaPits.length=0;cliffs.length=0;terraces.length=0;player.x=500;player.y=200;keys={};for(let i=0;i<80;i++)update();draw()');assert(run('Math.abs(companion.y-player.y)<35&&companion.y<300&&!companion.onGround'),'Every companion swims, including the sausage dog')}
 run('selectedBuddy=0;selectedLevel=6;reset();player.y=160;player.inv=100000;var seaCount=enemies.length;for(let i=0;i<120;i++)update();draw()');assert(run('enemies.length===seaCount&&enemies.every(e=>!e.onGround&&e.y<floorAtX(e.x)-e.h-40)'),'All underwater enemies swim instead of falling into gaps');
-for(const world of [1,2,3,4,5,6]){run('selectedLevel='+world+';reset();draw()');assert.equal(run('enemies.some(e=>e.type==="taco")'),world>=4,'Tacos start at World 4, not earlier');if(world>=4){run('enterSewer({exitX:2500});draw()');assert(run('enemies.some(e=>e.type==="taco")'),'Tacos also inhabit later-world sewers');run('exitSewer()')}}
+for(const world of [1,2,3,4,5,6,7]){run('selectedLevel='+world+';reset();draw()');assert.equal(run('enemies.some(e=>e.type==="taco")'),world>=4,'Tacos start at World 4, not earlier');if(world>=4){run('enterSewer({exitX:2500});draw()');assert(run('enemies.some(e=>e.type==="taco")'),'Tacos also inhabit later-world sewers');run('exitSewer()')}}
 run('selectedLevel=4;reset();objects=[];enemies=[{type:"taco",x:400,y:ground-42,w:52,h:42,hp:2,damage:1,shoot:1,dead:0,vy:0}];obstacles.length=0;platforms.length=0;lavaPits.length=0;cliffs.length=0;terraces.length=0;player.x=600;player.y=ground-player.h;keys={};update()');assert(run('objects.some(o=>o.taco)'),'Taco shoots recognizable green filling');
 const hatchMoves=[],oldMoveTo=canvasContext.moveTo;canvasContext.moveTo=(...args)=>hatchMoves.push(args);run('selectedLevel=1;reset();drawManhole({type:"manhole",x:0,y:0,w:70,h:12})');assert(hatchMoves.some(a=>a[1]===-113),'Entrance arrow is painted even outside training');hatchMoves.length=0;run('drawManhole({type:"manholeOutlet",x:0,y:0,w:70,h:12})');assert(!hatchMoves.some(a=>a[1]===-113),'Outlet is not mislabeled as an entrance');canvasContext.moveTo=oldMoveTo;
 run('selectedLevel=6;reset();player.hasKey=true;enterSewer({exitX:2500});var savedSeaBuddy=companion.type;for(let i=0;i<30;i++)update();draw()');assert(run('isSwimming()&&obstacles.some(o=>o.type==="reefBlock")&&obstacles.some(o=>o.type==="anchorBlock")'),'Underwater sewer has flooded swimming and its own obstacles');run('exitSewer()');assert(run('isSwimming()&&player.hasKey&&companion.type===savedSeaBuddy'),'Sewer return preserves the underwater world, key and companion');
@@ -585,13 +587,13 @@ run('boss.hp=boss.max/2;updateBossFight(player.y+player.h);var fixedSeaX=boss.he
 run('player.x=seaWave.x+125-player.w/2;player.y=seaWave.y+125-player.h/2;player.hp=20;player.inv=0;updateBossProjectile(seaWave);drawBossHeavyWave(seaWave)');assert.equal(run('player.hp'),10,'Fish-stick special deals 10 HP');
 run('player.x=seaWave.x+240;player.y=seaWave.y+230;player.hp=20;player.inv=0;updateBossProjectile({...seaWave,life:25})');assert.equal(run('player.hp'),20,'Swimming outside the circular burst avoids damage, including rectangular corners');
 run('for(let i=0;i<200;i++)updateBossSpecial()');assert.equal(run('boss.heavyCount'),1,'Fish-stick special is only used once');
-run('player.inv=100000;boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert(run('screen==="victory"&&victoryButtons.find(b=>b.id==="next").disabled'),'Only the sixth, final world ends progression');
+run('player.inv=100000;boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert(run('screen==="victory"&&!victoryButtons.find(b=>b.id==="next").disabled'),'Underwater now continues to the cloud world');
 run('selectedLevel=5;reset();startBoss();boss.hp=0;for(let i=0;i<76;i++)update();victoryAction("next")');assert(run('level===6&&isSwimming()'),'Moon victory continues into Underwater');
 for(const name of ['taco','boss-fishstick'])assert(fs.existsSync('assets/sprites/'+name+'.svg'),'New actor has its own offline SVG');
 const fishDrawing=fs.readFileSync('assets/sprites/boss-fishstick.svg','utf8');assert(fishDrawing.includes('fishstickCrustClip')&&fishDrawing.includes('M52 126')&&fishDrawing.includes('M50 58'),'The reference-style fish stick has crumb texture, black stick legs and a tooth-grid grin');
 run('selectedLevel=6;reset();startBoss();player.inv=100000;for(let i=0;i<600;i++){update();if(boss.y<75||boss.y+boss.h>ground-18+.01||boss.x<240||boss.x+boss.w>W-25+.01)throw Error("Tall fish-stick body left its swim bounds")}drawAquaticFallback("boss-fishstick",100,100,210,264);draw();var fishBellyX=boss.x+boss.w/2,fishBellyY=boss.y+boss.h-20;damageNear(fishBellyX,fishBellyY,25,4)');assert(run('boss.hp===boss.max-4&&findBossTarget(fishBellyX,fishBellyY,10)===boss'),'Explosions and companions can target the long lower body, not only its head');
 // Reference-style maki rolls begin at World 5, including its later-world sewers.
-for(const world of [0,1,2,3,4,5,6]){
+for(const world of [0,1,2,3,4,5,6,7]){
  run('selected=0;selectedBuddy=0;selectedLevel='+world+';reset();draw()');
  assert.equal(run('enemies.some(e=>e.type==="maki")'),world>=5,'Maki rolls appear only from World 5');
  if(world>=5)assert(run('enemies.filter(e=>e.type==="maki").every(e=>e.hp===2&&e.damage===1&&e.w===48&&e.h===58)'),'Maki rolls have two HP and a sprite-matched body');
@@ -640,4 +642,18 @@ run('selectedLevel=1;selectedBuddy=0;selected=0;reset();objects=[];obstacles.len
 run('enemies=[];player.vx=0;keys={d:true};var stickyX=player.x;for(let i=0;i<30;i++)update();var stickyTravel=player.x-stickyX;for(let i=0;i<150;i++)update();player.vx=0;var freeX=player.x;for(let i=0;i<30;i++)update()');assert(run('player.slow===0&&player.honeyTime===0&&player.x-freeX>stickyTravel*2'),'Sticky honey really slows movement, then wears off');
 run('reset();objects=[];obstacles.length=0;platforms.length=0;terraces.length=0;lavaPits.length=0;cliffs.length=0;keys={};enemies=[{type:"honey",x:160,y:ground-42,w:42,h:42,hp:2,damage:1,shoot:1000,dead:0,vy:0}];player.x=160;player.y=ground-42-player.h-3;player.vy=4;update()');assert(run('enemies[0].hp===1&&player.slow===0&&player.honeyTime===0&&player.vy<0'),'A successful honey stomp does not apply slowing');
 run('selectedLevel=6;reset();objects=[];obstacles.length=0;platforms.length=0;terraces.length=0;lavaPits.length=0;cliffs.length=0;player.inv=0;player.x=150;player.y=200;keys={};enemies=[{type:"honey",x:150,y:200,w:42,h:42,hp:3,damage:1,shoot:1000,dead:0,vy:0}];update()');assert(run('player.slow===180&&player.honeyTime===180'),'Swimming honey enemies also slow the player');
-console.log('PASS: sticky honey enemies, heavy cheese downpour, hidden-gully treasures and five-percent second companions; marshmallow, wind, maki and all existing mechanics.');
+// Cloud world: reachable selection/progression, themed platform physics, boss swap and power indicators.
+run('screen="levelselect";selectedLevel=6;draw()');handlers.global.keydown({key:'ArrowRight',repeat:false,preventDefault(){}});assert.equal(run('selectedLevel'),7,'Arrow navigation reaches the cloud world');handlers.global.keydown({key:'7',repeat:false,preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===7'),'Keyboard 7 selects the cloud world');
+run('reset();draw()');assert(run('level===7&&levelWidth===12500&&enemies.length===26&&!isSwimming()&&worldGravity()===.58&&lavaPits.length===0&&cliffs.length>0&&platforms.some(p=>p.cloudCookie)&&platforms.some(p=>p.cloudBun)&&objects.filter(o=>o.cloudPower).length>=3'),'Cloud world is a real land platformer with buns, crumble cookies, sky gaps and glide powers');
+assert(run('cliffs.every(g=>platforms.some(p=>p.cloudBun&&p.x>g.x&&p.x+p.w<g.x+g.w))'),'Every cloud gap has a reachable stable intermediate bun');
+run('screen="levelselect";draw();var cloudCard=menuButtons.find(b=>b.id==="level7")');handlers.canvas.pointerdown({pointerId:702,clientX:run('cloudCard.x+cloudCard.w/2'),clientY:run('cloudCard.y+cloudCard.h/2'),preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===7'),'Touch can select the seventh cloud-world card');
+run('selectedLevel=6;reset();startBoss();boss.hp=0;for(let i=0;i<76;i++)update();victoryAction("next")');assert(run('level===7&&isCloudWorld()'),'Underwater victory really starts Cloud Bakery');
+run('startBoss();boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert(run('screen==="victory"&&victoryButtons.find(b=>b.id==="next").disabled'),'Only the seventh world is now the final world');
+run('selectedLevel=7;reset();enemies=[];objects=[];obstacles.length=0;platforms.length=0;cliffs.length=0;terraces.length=0;var cookie={x:500,y:405,cloudHomeY:405,w:100,h:20,cloudCookie:true,broken:0,crumbleFrames:0};platforms.push(cookie);player.x=510;player.y=405-player.h;player.onGround=true;player.vy=0;for(let i=0;i<44;i++)updateCloudPlatforms()');assert(run('cookie.broken===0&&cookie.crumbleFrames===44'),'Cookie warns before collapsing');run('updateCloudPlatforms();update();draw()');assert(run('cookie.broken>0&&cookie.y>WORLD_BOTTOM&&!player.onGround&&player.vy>0'),'Crumbling cookie actually stops supporting the player');run('for(let i=0;i<240;i++)updateCloudPlatforms()');assert(run('cookie.broken===0&&cookie.y===405'),'Cookie platforms regenerate after four seconds');
+run('selectedLevel=7;reset();enterSewer({exitX:2500});draw()');assert(run('undergroundTrip.theme==="cloud"&&obstacles.some(o=>o.type==="waffleStack")&&obstacles.some(o=>o.type==="kitchenCan")'),'Cloud world has a working bakery-themed sewer');run('exitSewer();draw()');assert(run('isCloudWorld()&&platforms.some(p=>p.cloudCookie)'),'Sewer exit restores cloud-platform state');
+run('selectedLevel=3;reset();startBoss();player.hp=20;player.inv=0;updateBossProjectile({type:"stormBolt",x:player.x,y:player.y,w:20,h:28,vx:0,vy:0,life:20,damage:2})');assert.equal(run('player.hp'),18,'Croissant lightning deals two HP, not ten');
+run('selectedLevel=1;reset();var powerDraws=[],savedPowerSprite=sprite;sprite=(name,...args)=>powerDraws.push({name,args});player.fireTime=60;player.marshmallowTime=60;drawPlayerPowerIcons();sprite=savedPowerSprite');assert(run('powerDraws.length===2&&powerDraws[0].name==="chili"&&powerDraws[1].name==="marshmallow"&&powerDraws.every(p=>p.args[1]<player.y)&&powerDraws[0].args[0]!==powerDraws[1].args[0]'),'Both active powers hover above the player without overlapping');
+run('powerDraws=[];sprite=(name,...args)=>powerDraws.push(name);player.fireTime=0;player.marshmallowTime=0;drawPlayerPowerIcons();sprite=savedPowerSprite;drawChiliFallback(100,100,24,31)');assert.equal(run('powerDraws.length'),0,'Expired powers have no floating indicators');
+run('selectedLevel=7;reset();for(let i=0;i<1799;i++)updateWorldWind()');assert(run('!worldWind.active'),'Cloud wind waits thirty seconds');run('updateWorldWind()');assert(run('worldWind.active&&worldWind.remaining===300&&worldWind.nextAt===3600'),'Cloud wind comes every thirty seconds for five seconds');
+run('for(let i=0;i<600;i++)updateCloudWeather();draw()');assert(run('cloudRain.active&&cloudRain.remaining===600&&cloudRain.nextAt-cloudRain.time>=1200&&cloudRain.nextAt-cloudRain.time<1800'),'Cloud world has frequent ten-second heavy rain, without cheese damage');
+console.log('PASS: seven selectable worlds, working Cloud Bakery with frequent wind/heavy rain and crumble platforms, reference-style evil kitchen croissant / cloud cotton-candy boss swap, floating chili/marshmallow indicators and all existing mechanics.');

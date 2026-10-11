@@ -37,7 +37,7 @@ function enterSewer(hatch){
  hatch.visited=true;for(const list of [lavaPits,cliffs,obstacles,platforms,trees,hooks,terraces])list.length=0;
  levelWidth=hatch.hidden?2220:1800;doorX=levelWidth-120;camera=0;cameraY=0;secretPassages=[];particles=[];defeated=[];mandarinBabies=[];objects=[];
  const shift=(level%3)*45,jitter=Math.floor(Math.random()*35),rise=level===5?110:level===4?95:62;
- const obstacleTypes={training:['crate','rock'],forest:['crate','rock'],crystal:['crystalObstacle','crystalObstacle'],kitchen:['pipeBlock','kitchenCan'],frost:['iceBlock','waffleStack'],moon:['satelliteCrate','moonBoulder'],water:['reefBlock','anchorBlock']}[undergroundTrip.theme];
+ const obstacleTypes={training:['crate','rock'],forest:['crate','rock'],crystal:['crystalObstacle','crystalObstacle'],kitchen:['pipeBlock','kitchenCan'],frost:['iceBlock','waffleStack'],moon:['satelliteCrate','moonBoulder'],water:['reefBlock','anchorBlock'],cloud:['waffleStack','kitchenCan']}[undergroundTrip.theme];
  obstacles.push({type:obstacleTypes[0],x:475+shift+jitter,y:ground-rise,w:70,h:rise},{type:obstacleTypes[1],x:1010-shift,y:ground-90,w:85,h:90});
  platforms.push({x:1180+shift,y:ground-(level===2?145:level===5?180:115),w:95,h:20});
  enemies=[{type:'moldCheese',x:370,hp:3},{type:'donut',x:710,hp:2},{type:'donut',x:1090,hp:2},{type:'moldCheese',x:1360,hp:3}].map(e=>({...e,y:ground-42,w:42,h:42,damage:1,vx:0,vy:0,shoot:100,dead:0,slow:0,onGround:true}));
@@ -117,7 +117,7 @@ function drawSewerObstacle(o){
  x.restore();return true;
 }
 function drawSewerBackground(){
- const theme=undergroundTrip.theme,seed=undergroundTrip.styleSeed,colors={training:['#172936','#526b69','#425b60','#344b54'],forest:['#172936','#526b69','#425b60','#344b54'],crystal:['#251c43','#75618c','#695887','#483e63'],kitchen:['#293340','#727c83','#69757c','#505e68'],frost:['#142e4c','#698fa9','#749ab0','#486b8e'],moon:['#142538','#536b7e','#586e7d','#324956'],water:['#12344c','#337b91','#3d7d8c','#235265']}[theme];
+ const theme=undergroundTrip.theme,seed=undergroundTrip.styleSeed,colors={training:['#172936','#526b69','#425b60','#344b54'],forest:['#172936','#526b69','#425b60','#344b54'],crystal:['#251c43','#75618c','#695887','#483e63'],kitchen:['#293340','#727c83','#69757c','#505e68'],frost:['#142e4c','#698fa9','#749ab0','#486b8e'],moon:['#142538','#536b7e','#586e7d','#324956'],water:['#12344c','#337b91','#3d7d8c','#235265'],cloud:['#25364e','#759ab8','#657e99','#516985']}[theme];
  if(theme==='water'){drawWaterBackground();x.fillStyle='rgba(8,37,64,.22)';x.fillRect(0,0,W,H);return}
  const shade=x.createLinearGradient(0,0,0,H);shade.addColorStop(0,colors[0]);shade.addColorStop(1,colors[1]);x.fillStyle=shade;x.fillRect(0,0,W,H);
  for(let row=0;row<12;row++)for(let col=-1;col<22;col++){const px=col*58-(camera*.15)%58-(row%2)*29,py=60+row*38;x.fillStyle=(col+row+seed)%3===0?colors[2]:colors[3];x.fillRect(px,py,55,34)}

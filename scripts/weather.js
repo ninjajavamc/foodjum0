@@ -1,8 +1,9 @@
 // Heavy localized cheese downpour: 30 pieces/second; first at 30 s, dry gaps 30–45 s.
 let kitchenWeather={};
 let worldWind={};
-function resetKitchenWeather(){kitchenWeather={time:0,nextAt:1800,active:false,x:0,w:360,remaining:0,spawnIn:0,practice:false};worldWind={time:0,nextAt:5400,active:false,remaining:0,practice:false}}
-function startWorldWind(practice=false){worldWind.active=true;worldWind.remaining=300;worldWind.practice=practice;worldWind.nextAt=worldWind.time+5400}
+function resetKitchenWeather(){kitchenWeather={time:0,nextAt:1800,active:false,x:0,w:360,remaining:0,spawnIn:0,practice:false};worldWind={time:0,nextAt:windInterval(),active:false,remaining:0,practice:false};resetCloudWeather()}
+function windInterval(){return level===7?1800:5400}
+function startWorldWind(practice=false){worldWind.active=true;worldWind.remaining=300;worldWind.practice=practice;worldWind.nextAt=worldWind.time+windInterval()}
 function updateWorldWind(){
  if(screen!=='play'||boss||undergroundTrip||(level<3&&!(isTutorial()&&worldWind.practice)))return;
  worldWind.time++;

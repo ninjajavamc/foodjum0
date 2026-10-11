@@ -3,10 +3,11 @@
 function drawDessertFallback(name,left,top,width,height){
  x.save();x.translate(left,top);x.scale(width/128,height/160);x.strokeStyle='#493a4a';x.lineWidth=3;
  if(name==='pudding'){x.fillStyle='#ba87d4';x.beginPath();x.moveTo(28,48);x.lineTo(100,48);x.lineTo(115,132);x.quadraticCurveTo(64,152,13,132);x.closePath();x.fill();x.stroke();x.fillStyle='#e7c6f2';x.beginPath();x.ellipse(64,48,36,13,0,0,Math.PI*2);x.fill();x.stroke()}
+ if(name==='boss-croissant'){x.fillStyle='#efc17b';x.beginPath();x.moveTo(8,100);x.quadraticCurveTo(2,38,36,42);x.quadraticCurveTo(64,20,94,42);x.quadraticCurveTo(128,38,120,100);x.quadraticCurveTo(105,128,79,109);x.quadraticCurveTo(64,116,42,109);x.quadraticCurveTo(22,128,8,100);x.closePath();x.fill();x.stroke()}
  if(name==='boss-cotton'){x.fillStyle='#f2b5d9';for(const [cx,cy,r] of [[34,59,28],[72,40,31],[97,73,27],[64,102,34]]){x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.fill();x.stroke()}x.fillStyle='#fff1d4';x.beginPath();x.moveTo(53,128);x.lineTo(77,128);x.lineTo(65,156);x.fill()}
  if(name==='boss-popcorn'){x.fillStyle='#ed7971';x.fillRect(27,60,74,88);x.strokeRect(27,60,74,88);x.fillStyle='#fff3d5';for(let px=35;px<100;px+=23)x.fillRect(px,64,10,79);x.fillStyle='#fff3bb';for(let i=0;i<5;i++){x.beginPath();x.arc(24+i*20,40+(i%2)*10,20,0,Math.PI*2);x.fill();x.stroke()}}
  if(name==='boss-bigmac'){for(let i=0;i<3;i++){x.fillStyle='#dfb36f';x.fillRect(12,30+i*40,106,16);x.fillStyle='#78ab65';x.fillRect(12,46+i*40,106,8);x.fillStyle='#77523d';x.fillRect(12,54+i*40,106,15);x.strokeRect(12,30+i*40,106,39)}}
- const cy=name==='boss-bigmac'?39:name==='boss-popcorn'?94:82;x.fillStyle='#fff';for(const px of [49,77]){x.beginPath();x.ellipse(px,cy,7,10,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#493a4a';x.beginPath();x.arc(px+1,cy+2,3,0,Math.PI*2);x.fill();x.fillStyle='#fff'}x.strokeStyle='#493a4a';x.beginPath();x.moveTo(48,cy+22);x.quadraticCurveTo(64,cy+34,81,cy+22);x.stroke();x.restore();
+ const cy=name==='boss-croissant'?46:name==='boss-bigmac'?39:name==='boss-popcorn'?94:82;x.fillStyle='#fff';for(const px of [49,77]){x.beginPath();x.ellipse(px,cy,7,10,0,0,Math.PI*2);x.fill();x.stroke();x.fillStyle='#493a4a';x.beginPath();x.arc(px+1,cy+2,3,0,Math.PI*2);x.fill();x.fillStyle='#fff'}x.strokeStyle='#493a4a';x.beginPath();x.moveTo(48,cy+22);x.quadraticCurveTo(64,cy+34,81,cy+22);x.stroke();x.restore();
 }
 function updateCottonFlight(b){
  b.previousY=b.y;b.flightTime++;

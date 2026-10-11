@@ -22,8 +22,8 @@ function drawBossWarning(){
 }
 function drawBossHeavyWave(o){
  if(o.flavor==='boss-fishstick'){x.save();x.fillStyle='rgba(142,227,248,.5)';x.strokeStyle='#f2fcff';x.lineWidth=4;x.beginPath();x.arc(o.x+125,o.y+125,125,0,Math.PI*2);x.fill();x.stroke();for(let i=0;i<8;i++){x.beginPath();x.arc(o.x+125+Math.cos(i)*84,o.y+125+Math.sin(i)*84,12,0,Math.PI*2);x.stroke()}x.restore();return}
- if(['boss-cotton','boss-popcorn','boss-bigmac'].includes(o.flavor)){
-  const color=o.flavor==='boss-cotton'?'#f2a0ce':o.flavor==='boss-popcorn'?'#ffe29a':'#85c56e';x.save();x.fillStyle=color;x.globalAlpha=.75;x.fillRect(o.x,o.y,o.w,o.h);x.strokeStyle='#fff9e7';x.lineWidth=3;
+ if(['boss-cotton','boss-croissant','boss-popcorn','boss-bigmac'].includes(o.flavor)){
+  const color=o.flavor==='boss-croissant'?'#b9a0e4':o.flavor==='boss-cotton'?'#f2a0ce':o.flavor==='boss-popcorn'?'#ffe29a':'#85c56e';x.save();x.fillStyle=color;x.globalAlpha=.75;x.fillRect(o.x,o.y,o.w,o.h);x.strokeStyle='#fff9e7';x.lineWidth=3;
   for(let i=0;i<9;i++){x.beginPath();x.arc(o.x+14+i*28,ground-25-Math.sin(tick+i)*8,18,0,Math.PI*2);x.fill();x.stroke()}x.restore();return;
  }
  x.save();x.fillStyle='rgba(255,101,49,.55)';x.fillRect(o.x,o.y,o.w,o.h);x.strokeStyle='#fff0a2';x.lineWidth=4;x.beginPath();x.ellipse(o.x+o.w/2,ground-8,o.w/2,18,0,0,Math.PI*2);x.stroke();
