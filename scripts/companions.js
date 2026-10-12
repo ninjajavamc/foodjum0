@@ -23,7 +23,7 @@ function recruitSecretBuddy(index){
 }
 function updateCompanions(){updateCompanion();updateCompanion(secretCompanion,125)}
 function drawBuddyChoose(){
- x.fillStyle='rgba(20,20,45,.9)';x.fillRect(0,0,W,H);x.textAlign='center';x.fillStyle='#fff';x.font='bold 38px system-ui';x.fillText('Wähle deinen Begleiter',W/2,105);x.font='19px system-ui';x.fillText(worldName(selectedLevel)+' · Deine Figur: '+chars[selected].name,W/2,145);drawMenuBack();
+ x.fillStyle='rgba(20,20,45,.9)';fillViewport();x.textAlign='center';x.fillStyle='#fff';x.font='bold 38px system-ui';x.fillText('Wähle deinen Begleiter',W/2,105);x.font='19px system-ui';x.fillText(worldName(selectedLevel)+' · Deine Figur: '+chars[selected].name,W/2,145);drawMenuBack();
  buddyCards=BUDDIES.map((buddy,i)=>({x:40+i*240,y:185,w:200,h:290,id:i}));
  for(const card of buddyCards){const buddy=BUDDIES[card.id];x.fillStyle=card.id===selectedBuddy?'#fff0bb':'#fff';x.fillRect(card.x,card.y,card.w,card.h);x.strokeStyle=card.id===selectedBuddy?'#ec985d':'#798baa';x.lineWidth=4;x.strokeRect(card.x,card.y,card.w,card.h);sprite(buddy.art,card.x+43,card.y+15,114,132);if(buddy.art==='toothpaste')drawGooglyEyes(card.x+85,card.y+23,30,10);if(buddy.art==='toothbrush')drawGooglyEyes(card.x+88,card.y+21,22,9);x.fillStyle='#2c3548';x.font='bold 21px system-ui';x.fillText(buddy.name,card.x+card.w/2,card.y+175);wrap(buddy.text,card.x+22,card.y+206,card.w-44,20,'#2c3548')}
  x.fillStyle='#fff';x.font='18px system-ui';x.fillText('Antippen oder ← → und Enter zum Starten',W/2,520);x.font='14px system-ui';x.fillText('Esc: zurück zur Charakterwahl',W/2,554);

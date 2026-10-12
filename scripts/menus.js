@@ -22,12 +22,12 @@ function drawMenuBack(){
  const b={id:'back',x:25,y:22,w:140,h:38,label:'ZURÜCK'};x.save();x.fillStyle='#344d55';x.fillRect(b.x,b.y,b.w,b.h);x.fillStyle='#fff8e7';x.font='bold 16px system-ui';x.textAlign='center';x.fillText(b.label,b.x+b.w/2,b.y+25);x.restore();
 }
 function drawStart(){
- x.save();x.fillStyle='rgba(25,43,53,.8)';x.fillRect(0,0,W,H);x.textAlign='center';x.fillStyle='#ffebad';x.font='900 61px system-ui';x.fillText('FOOD JUM0',W/2,145);x.fillStyle='#e0eee1';x.font='21px system-ui';x.fillText('Dein Food-Platformer',W/2,192);
+ x.save();x.fillStyle='rgba(25,43,53,.8)';fillViewport();x.textAlign='center';x.fillStyle='#ffebad';x.font='900 61px system-ui';x.fillText('FOOD JUM0',W/2,145);x.fillStyle='#e0eee1';x.font='21px system-ui';x.fillText('Dein Food-Platformer',W/2,192);
  menuButtons=[{id:'levels',x:270,y:246,w:460,h:68,label:'WELT-AUSWAHL'},{id:'multiplayer',x:270,y:336,w:460,h:68,label:'MULTIPLAYER – kommt noch',disabled:true}];menuButtons.push({id:'tutorial',x:270,y:424,w:460,h:52,label:'TOTARIAL – zuerst üben (T)'});menuButtons.forEach(drawMenuButton);
  sprite('spaghetti',75,300,110,150);sprite('banane',812,300,110,150);x.fillStyle='#e3eede';x.font='17px system-ui';x.fillText(message==='Multiplayer kommt noch.'?message:'Level auswählen oder Enter drücken',W/2,525);x.restore();
 }
 function drawLevelSelect(){
- x.save();x.fillStyle='rgba(25,43,53,.84)';x.fillRect(0,0,W,H);x.textAlign='center';x.fillStyle='#ffebad';x.font='bold 40px system-ui';x.fillText('WELT-AUSWAHL',W/2,82);x.fillStyle='#e0eee1';x.font='19px system-ui';x.fillText('Welches Abenteuer möchtest du spielen?',W/2,115);
+ x.save();x.fillStyle='rgba(25,43,53,.84)';fillViewport();x.textAlign='center';x.fillStyle='#ffebad';x.font='bold 40px system-ui';x.fillText('WELT-AUSWAHL',W/2,82);x.fillStyle='#e0eee1';x.font='19px system-ui';x.fillText('Welches Abenteuer möchtest du spielen?',W/2,115);
  menuButtons=[{id:'back',x:25,y:22,w:140,h:38}];
  for(let i=0;i<7;i++){
   const row=i<4?0:1,col=i<4?i:i-4;

@@ -81,7 +81,7 @@ function drawCraftStation(o){
  x.fillStyle='#24394a';x.textAlign='center';x.font='bold 12px system-ui';x.fillText('WERKBANK · I',o.x+o.w/2,o.y-35);
 }
 function drawInventory(){
- x.save();x.fillStyle='rgba(20,26,43,.96)';x.fillRect(0,0,W,H);x.fillStyle='#fff1c3';x.textAlign='center';x.font='bold 34px system-ui';x.fillText(screen==='crafting'?'WERKBANK':'INVENTAR',W/2,78);
+ x.save();x.fillStyle='rgba(20,26,43,.96)';fillViewport();x.fillStyle='#fff1c3';x.textAlign='center';x.font='bold 34px system-ui';x.fillText(screen==='crafting'?'WERKBANK':'INVENTAR',W/2,78);
  const workshop=screen==='crafting',recipe=RECIPES[selectedRecipe],storage=inventoryStorage();
  inventoryButtons=[{id:'close',x:899,y:28,w:65,h:38,label:'X'},{id:'drop',x:108,y:451,w:280,h:44,label:'Item ablegen (R)'},workshop?{id:'craft',x:586,y:481,w:290,h:44,label:'Herstellen (C)'}:{id:'openCraft',x:586,y:265,w:290,h:55,label:'Werkbank öffnen (B)'}];
  inventoryButtons.push({id:'powerTab',x:108,y:93,w:145,h:25,label:'POWERS / ITEMS'},{id:'buildTab',x:265,y:93,w:170,h:25,label:'BAUSACHEN'});

@@ -72,7 +72,7 @@ function reviveTutorial(){
 }
 function drawTutorialMarkers(){
  if(!isTutorial()||boss||undergroundTrip)return;
- for(const o of objects.filter(o=>o.type==='lesson'&&o.x>camera-70&&o.x<camera+W+70)){
+ for(const o of objects.filter(o=>o.type==='lesson'&&o.x>camera-70&&o.x<camera+viewWidth+70)){
   x.fillStyle='#568878';x.fillRect(o.x+20,ground-75,7,75);x.fillStyle='#fff0b8';x.strokeStyle='#587e78';x.lineWidth=3;x.fillRect(o.x-15,ground-125,76,52);x.strokeRect(o.x-15,ground-125,76,52);x.fillStyle='#315a65';x.font='bold 18px system-ui';x.textAlign='center';x.fillText(String(TUTORIAL_LESSONS.indexOf(o.lesson)+1),o.x+23,ground-93);
  }
 }

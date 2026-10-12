@@ -88,7 +88,7 @@ function exitSewer(){
  const trip=undergroundTrip,saved=trip.saved;undergroundTrip=null;
  for(const name of ['lavaPits','cliffs','obstacles','platforms','trees','hooks','terraces']){const list={lavaPits,cliffs,obstacles,platforms,trees,hooks,terraces}[name];list.splice(0,list.length,...saved[name])}
  levelWidth=saved.levelWidth;doorX=saved.doorX;objects=saved.objects;enemies=saved.enemies;particles=saved.particles;defeated=saved.defeated;secretPassages=saved.secretPassages;mandarinBabies=[];
- resetTraversalPosition(trip.exitX+14,floorAtX(trip.exitX+35));camera=Math.max(0,Math.min(levelWidth-W,player.x-W*.35));cameraY=floorAtX(player.x+player.w/2)-ground;resetCompanion();keys={};heldPointers.clear();playSound('menu');message='Wieder draußen! Dieser Gully liegt weiter vorne im Level.';
+ resetTraversalPosition(trip.exitX+14,floorAtX(trip.exitX+35));camera=cameraTargetX(player.x);cameraY=floorAtX(player.x+player.w/2)-ground;resetCompanion();keys={};heldPointers.clear();playSound('menu');message='Wieder draußen! Dieser Gully liegt weiter vorne im Level.';
 }
 function drawManhole(o){
  x.save();x.translate(o.x,o.y);x.fillStyle='#3d5158';x.strokeStyle='#a0b7b7';x.lineWidth=3;x.beginPath();x.ellipse(o.w/2,6,o.w/2,9,0,0,Math.PI*2);x.fill();x.stroke();x.strokeStyle='#718c93';x.lineWidth=2;
@@ -117,9 +117,10 @@ function drawSewerObstacle(o){
  x.restore();return true;
 }
 function drawSewerBackground(){
+ const W=viewWidth,H=viewHeight;
  const theme=undergroundTrip.theme,seed=undergroundTrip.styleSeed,colors={training:['#172936','#526b69','#425b60','#344b54'],forest:['#172936','#526b69','#425b60','#344b54'],crystal:['#251c43','#75618c','#695887','#483e63'],kitchen:['#293340','#727c83','#69757c','#505e68'],frost:['#142e4c','#698fa9','#749ab0','#486b8e'],moon:['#142538','#536b7e','#586e7d','#324956'],water:['#12344c','#337b91','#3d7d8c','#235265'],cloud:['#25364e','#759ab8','#657e99','#516985']}[theme];
- if(theme==='water'){drawWaterBackground();x.fillStyle='rgba(8,37,64,.22)';x.fillRect(0,0,W,H);return}
- const shade=x.createLinearGradient(0,0,0,H);shade.addColorStop(0,colors[0]);shade.addColorStop(1,colors[1]);x.fillStyle=shade;x.fillRect(0,0,W,H);
+ if(theme==='water'){drawWaterBackground();x.fillStyle='rgba(8,37,64,.22)';x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);return}
+ const shade=x.createLinearGradient(0,0,0,H);shade.addColorStop(0,colors[0]);shade.addColorStop(1,colors[1]);x.fillStyle=shade;x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);
  for(let row=0;row<12;row++)for(let col=-1;col<22;col++){const px=col*58-(camera*.15)%58-(row%2)*29,py=60+row*38;x.fillStyle=(col+row+seed)%3===0?colors[2]:colors[3];x.fillRect(px,py,55,34)}
  x.strokeStyle='#294047';x.lineWidth=24;x.beginPath();x.moveTo(0,115);x.lineTo(W,115);x.stroke();x.strokeStyle=theme==='kitchen'?'#b7c8cf':theme==='frost'?'#b9e5f4':theme==='crystal'?'#a38abd':'#728f87';x.lineWidth=14;x.stroke();
  if(theme==='crystal'||theme==='frost')for(let i=0;i<14;i++){const px=i*85-(camera*.2)%85;x.fillStyle=theme==='crystal'?'#aa8bda':'#d6f4ff';x.beginPath();x.moveTo(px,0);x.lineTo(px+12,45+(i%3)*12);x.lineTo(px+25,0);x.fill()}

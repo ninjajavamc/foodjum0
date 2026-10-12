@@ -17,16 +17,23 @@ function stopAtTerrainStep(previousX,previousBottom){
  if(newFloor<oldFloor&&previousBottom>newFloor+4){player.x=previousX;player.vx=0}
 }
 function drawTerrainFloors(){
- const start=Math.max(0,camera-80),end=Math.min(boss?W:levelWidth,camera+W+80),cuts=[start,end];
+ const start=boss?camera-80:Math.max(0,camera-80),end=boss?camera+viewWidth+80:Math.min(levelWidth,camera+viewWidth+80),cuts=[start,end];
+ const bottom=Math.max(WORLD_BOTTOM,cameraY-viewOffsetY+viewHeight);
  if(!boss)for(const t of terraces)for(const edge of [t.x,t.x+t.w])if(edge>start&&edge<end)cuts.push(edge);
  cuts.sort((a,b)=>a-b);
  for(let i=0;i<cuts.length-1;i++){
   const left=cuts[i],right=cuts[i+1],surface=boss?ground:baseFloorAtX((left+right)/2);
-  const soil=x.createLinearGradient(0,surface,0,surface+260),colors=worldFloorColors();soil.addColorStop(0,colors[0]);soil.addColorStop(1,colors[1]);x.fillStyle=soil;x.fillRect(left,surface,right-left,WORLD_BOTTOM-surface);
+  const soil=x.createLinearGradient(0,surface,0,surface+260),colors=worldFloorColors();soil.addColorStop(0,colors[0]);soil.addColorStop(1,colors[1]);x.fillStyle=soil;x.fillRect(left,surface,right-left,bottom-surface);
   if(undergroundTrip){x.fillStyle='#a2b2a2';x.fillRect(left,surface,right-left,10)}else drawGrassStrip(left,right,surface);
   if(!undergroundTrip&&worldSettings().theme==='kitchen'){
-   x.strokeStyle='#d8dfe3';x.lineWidth=1;for(let px=Math.ceil(left/90)*90;px<right;px+=90){x.beginPath();x.moveTo(px,surface+12);x.lineTo(px,WORLD_BOTTOM);x.stroke()}for(let py=surface+70;py<WORLD_BOTTOM;py+=70){x.beginPath();x.moveTo(left,py);x.lineTo(right,py);x.stroke()}
-  }else{x.fillStyle='rgba(74,48,31,.25)';for(let py=surface+38;py<WORLD_BOTTOM;py+=43)for(let px=left+14;px<right;px+=67){x.beginPath();x.ellipse(px,py,4+Math.abs(Math.sin(px))*5,2,0,0,Math.PI*2);x.fill()}}
+   x.strokeStyle='#d8dfe3';x.lineWidth=1;for(let px=Math.ceil(left/90)*90;px<right;px+=90){x.beginPath();x.moveTo(px,surface+12);x.lineTo(px,bottom);x.stroke()}for(let py=surface+70;py<bottom;py+=70){x.beginPath();x.moveTo(left,py);x.lineTo(right,py);x.stroke()}
+  }else{x.fillStyle='rgba(74,48,31,.25)';for(let py=surface+38;py<bottom;py+=43)for(let px=left+14;px<right;px+=67){x.beginPath();x.ellipse(px,py,4+Math.abs(Math.sin(px))*5,2,0,0,Math.PI*2);x.fill()}}
+ }
+ // The original arena remains fixed; visible posts explain its bounds in wide views.
+ if(boss)for(const edge of [0,W]){
+  const px=edge===0?-18:edge;x.fillStyle='#8ba3aa';x.fillRect(px,ground-150,18,150);
+  x.fillStyle='#d5e5dd';for(let py=ground-144;py<ground;py+=30)x.fillRect(px+3,py,12,5);
+  x.fillStyle='#f2cd83';x.fillRect(px-3,ground-156,24,9);
  }
 }
 function safeColaX(preferred,width=64){
@@ -169,15 +176,15 @@ function drawExtraTerrain(){
  if(boss)return;
  x.save();
  for(const cliff of cliffs){
-  if(cliff.x+cliff.w<camera-50||cliff.x>camera+W+50)continue;
+  if(cliff.x+cliff.w<camera-50||cliff.x>camera+viewWidth+50)continue;
   if(isCloudWorld()){drawCloudGap(cliff);continue}
   x.fillStyle='#263b52';x.fillRect(cliff.x,cliff.y,cliff.w,WORLD_BOTTOM-cliff.y);x.strokeStyle='#826f67';x.lineWidth=5;
   for(const edge of [cliff.x,cliff.x+cliff.w]){x.beginPath();x.moveTo(edge,cliff.y);x.lineTo(edge,cliff.y+28);x.lineTo(edge+(edge===cliff.x?-8:8),cliff.y+45);x.lineTo(edge,cliff.y+68);x.stroke()}
   x.fillStyle='#7192a0';x.beginPath();x.moveTo(cliff.x+15,cliff.y+180);x.lineTo(cliff.x+cliff.w/2,cliff.y+150);x.lineTo(cliff.x+cliff.w-10,cliff.y+180);x.fill();
  }
- for(const p of platforms)if(p.moving&&p.x+p.w>camera-50&&p.x<camera+W+50){if(drawCloudPlatform(p))continue;x.fillStyle='#cdab7b';x.strokeStyle='#684c3f';x.lineWidth=3;x.fillRect(p.x,p.y,p.w,p.h);x.strokeRect(p.x,p.y,p.w,p.h)}
+ for(const p of platforms)if(p.moving&&p.x+p.w>camera-50&&p.x<camera+viewWidth+50){if(drawCloudPlatform(p))continue;x.fillStyle='#cdab7b';x.strokeStyle='#684c3f';x.lineWidth=3;x.fillRect(p.x,p.y,p.w,p.h);x.strokeRect(p.x,p.y,p.w,p.h)}
  for(const o of obstacles){
-  if(o.x+o.w<camera-50||o.x>camera+W+50)continue;
+  if(o.x+o.w<camera-50||o.x>camera+viewWidth+50)continue;
   if(undergroundTrip&&drawSewerObstacle(o))continue;
   if(drawCloudObstacle(o))continue;
   if(o.type==='spikes'){
@@ -188,7 +195,7 @@ function drawExtraTerrain(){
    x.beginPath();if(o.type==='crate'){x.moveTo(o.x+5,o.y+5);x.lineTo(o.x+o.w-5,o.y+o.h-5);x.moveTo(o.x+o.w-5,o.y+5);x.lineTo(o.x+5,o.y+o.h-5)}else{x.moveTo(o.x-4,o.y+10);x.lineTo(o.x+o.w+4,o.y+10)}x.stroke();
   }
  }
- for(const h of hooks)if(!h.tree&&h.x>camera-50&&h.x<camera+W+50){
+ for(const h of hooks)if(!h.tree&&h.x>camera-50&&h.x<camera+viewWidth+50){
   x.strokeStyle='#7b7872';x.lineWidth=2;x.beginPath();x.moveTo(h.x,h.y-170);x.lineTo(h.x,h.y-10);x.stroke();x.fillStyle='#9c7959';x.fillRect(h.x-24,h.y-180,48,12);
   x.strokeStyle='#f5cd69';x.lineWidth=5;x.beginPath();x.arc(h.x,h.y,8,-Math.PI*.7,Math.PI*.8);x.stroke();
  }
@@ -215,7 +222,7 @@ function handleVictoryKey(event){
  if(key==='n')victoryAction('next');
 }
 function drawVictory(){
- x.save();x.fillStyle='rgba(21,25,46,.94)';x.fillRect(0,0,W,H);
+ x.save();x.fillStyle='rgba(21,25,46,.94)';fillViewport();
  const time=performance.now()/1000;
  for(let i=0;i<32;i++){x.fillStyle=['#efad68','#e586a0','#8dd2aa'][i%3];x.save();x.translate((i*157)%W,(i*83+Math.sin(time+i)*8)%H);x.rotate(i+time*.1);x.fillRect(-3,-5,6,10);x.restore()}
  x.textAlign='center';x.fillStyle='#ffe5a0';x.font='900 48px system-ui';x.fillText('GRATULATION!',W/2,142);x.fillStyle='#fff';x.font='24px system-ui';x.fillText(isTutorial()?'Totarial: Übungsboss besiegt!':worldName()+' geschafft!',W/2,190);x.font='18px system-ui';x.fillText('Punkte: '+player.score,W/2,229);

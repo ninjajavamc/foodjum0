@@ -1,6 +1,6 @@
 # Food Jum0
 
-`index.html` in Chrome öffnen. Kein Server und kein Internet erforderlich. Die Spielfläche nutzt das ganze Fenster; der **Vollbild-Button** blendet auch die Browserleisten aus. Nach Änderungen mit **Strg + F5** neu laden.
+`index.html` in Chrome öffnen. Kein Server und kein Internet erforderlich. Die Spielfläche nutzt das ganze Fenster **ohne Verzerrung oder Balken**: breite Bildschirme zeigen mehr Level in der Breite, höhere mehr nach oben und unten. Menüs behalten ihre Proportionen, Touch-Tasten bleiben am Bildschirmrand. Physik und Boss-Arenen bleiben unverändert. Der **Vollbild-Button** blendet auch die Browserleisten aus. Nach Änderungen mit **Strg + F5** neu laden.
 
 ## Online spielen (iPad und PC)
 **Spiel-Link:** https://ninjajavamc.github.io/foodjum0/

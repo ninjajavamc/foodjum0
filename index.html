@@ -19,33 +19,34 @@
 <button id="fullscreenToggle" onclick="toggleFullscreen()">Vollbild</button>
 <div id="hint">PC: A/D oder ←/→ zum Laufen · Leertaste zum Springen · E / ★ Spezial · F / ITEM benutzen · 1–5 Inventare · I Inventar · B Werkbank · Esc Pause · R Ablegen · W Nutzen / Klettern · S Leiter runter</div>
 <a id="credits" href="credits.html" target="_blank">Bildquellen</a>
-<script src="scripts/audio.js?v=cloud7"></script>
-<script src="scripts/worlds.js?v=cloud7"></script>
-<script src="scripts/world-art.js?v=cloud7"></script>
-<script src="scripts/kitchen-art.js?v=cloud7"></script>
-<script src="scripts/frost-art.js?v=cloud7"></script>
-<script src="scripts/moon-art.js?v=cloud7"></script>
-<script src="scripts/underwater.js?v=cloud7"></script>
-<script src="scripts/clouds.js?v=cloud7"></script>
-<script src="scripts/pudding.js?v=cloud7"></script>
-<script src="scripts/weather.js?v=cloud7"></script>
-<script src="scripts/game-features.js?v=cloud7"></script>
-<script src="scripts/companions.js?v=cloud7"></script>
-<script src="scripts/crafting.js?v=cloud7"></script>
-<script src="scripts/scenery.js?v=cloud7"></script>
-<script src="scripts/abilities.js?v=cloud7"></script>
-<script src="scripts/structures.js?v=cloud7"></script>
-<script src="scripts/traversal.js?v=cloud7"></script>
-<script src="scripts/sewers.js?v=cloud7"></script>
-<script src="scripts/menus.js?v=cloud7"></script>
-<script src="scripts/bosses.js?v=cloud7"></script>
-<script src="scripts/boss-moves.js?v=cloud7"></script>
-<script src="scripts/dessert-bosses.js?v=cloud7"></script>
-<script src="scripts/secrets.js?v=cloud7"></script>
-<script src="scripts/tutorial.js?v=cloud7"></script>
+<script src="scripts/viewport.js?v=viewport1"></script>
+<script src="scripts/audio.js?v=viewport1"></script>
+<script src="scripts/worlds.js?v=viewport1"></script>
+<script src="scripts/world-art.js?v=viewport1"></script>
+<script src="scripts/kitchen-art.js?v=viewport1"></script>
+<script src="scripts/frost-art.js?v=viewport1"></script>
+<script src="scripts/moon-art.js?v=viewport1"></script>
+<script src="scripts/underwater.js?v=viewport1"></script>
+<script src="scripts/clouds.js?v=viewport1"></script>
+<script src="scripts/pudding.js?v=viewport1"></script>
+<script src="scripts/weather.js?v=viewport1"></script>
+<script src="scripts/game-features.js?v=viewport1"></script>
+<script src="scripts/companions.js?v=viewport1"></script>
+<script src="scripts/crafting.js?v=viewport1"></script>
+<script src="scripts/scenery.js?v=viewport1"></script>
+<script src="scripts/abilities.js?v=viewport1"></script>
+<script src="scripts/structures.js?v=viewport1"></script>
+<script src="scripts/traversal.js?v=viewport1"></script>
+<script src="scripts/sewers.js?v=viewport1"></script>
+<script src="scripts/menus.js?v=viewport1"></script>
+<script src="scripts/bosses.js?v=viewport1"></script>
+<script src="scripts/boss-moves.js?v=viewport1"></script>
+<script src="scripts/dessert-bosses.js?v=viewport1"></script>
+<script src="scripts/secrets.js?v=viewport1"></script>
+<script src="scripts/tutorial.js?v=viewport1"></script>
 <script>
 const c=document.querySelector('#game'), x=c.getContext('2d');
-const W=c.width,H=c.height,ground=525,MAX_HP=20,WORLD_BOTTOM=1100;
+const W=1000,H=620,ground=525,MAX_HP=20,WORLD_BOTTOM=1100;
 const MENTOS_SPEED=1.8,MENTOS_GRAVITY=.14,JUMP_SPEED=13.5;
 const lavaPits=[],trees=[],platforms=[],cliffs=[],obstacles=[],hooks=[],terraces=[];
 let levelWidth=9000,doorX=8855,defeated=[],playerDeathTimer=0,tick=0,shake=0,screenFlash=0,shakeX=0,shakeY=0,cameraY=0,victoryButtons=[],overButtons=[];
@@ -246,12 +247,12 @@ function update(){
  enemies=enemies.filter(e=>!e.dead);
  updateBossFight(previousBottom);updateTutorial();
 
- const target= boss?0:Math.max(0,Math.min(levelWidth-W,p.x-W*.35));camera+=(target-camera)*.12;
+ const target= boss?cameraTargetX(p.x,W):cameraTargetX(p.x);camera+=(target-camera)*.12;
  const targetY=boss&&level!==5?0:Math.min(floorAtX(p.x+p.w/2)-ground,p.y-170);cameraY+=(targetY-cameraY)*.1;
 }
 const art={};
 for(const name of ['spaghetti','mandarine','banane','kartoffel','granatapfel','honey','lemon','peel','cola','hat','door','boss','gummy','lunchbox','mushroom','gum','wasabi','mandarin-piece','sponge','sausage-dog','key','toothpaste','toothbrush','material-sugar','material-herbs','material-spice','material-stone','material-spoon','material-wood','catapultKit','wallKit','boss-fork','boss-spoon','boss-knife','springKit','secret-wall','ladderKit','moldCheese','donut','boss-cotton','boss-popcorn','boss-bigmac','pudding','taco','boss-fishstick','maki','marshmallow','boss-croissant','chili']){
- const image=new Image(); image.src='assets/sprites/'+name+'.svg?v=cloud7'; art[name]=image;
+ const image=new Image(); image.src='assets/sprites/'+name+'.svg?v=viewport1'; art[name]=image;
 }
 function sprite(name,left,top,width,height){
  const image=art[name];
@@ -265,7 +266,7 @@ function drawLava(){
  if(boss)return;
  const time=performance.now()/1000;
  for(const pit of lavaPits){
-  if(pit.x+pit.w<camera-40||pit.x>camera+W+40)continue;
+  if(pit.x+pit.w<camera-40||pit.x>camera+viewWidth+40)continue;
   const surface=pit.y??ground;
   x.save();x.beginPath();x.rect(pit.x,surface-10,pit.w,WORLD_BOTTOM-surface+10);x.clip();
   x.fillStyle=level===4?'#387da8':'#124d36';x.fillRect(pit.x,surface,pit.w,WORLD_BOTTOM-surface);
@@ -312,45 +313,46 @@ function drawColaFlow(flow){
 function drawScenery(){
  x.save();x.strokeStyle='#4c4435';x.lineWidth=3;
  for(const tree of trees){
-  if(tree.x<camera-140||tree.x>camera+W+140)continue;
+  if(tree.x<camera-140||tree.x>camera+viewWidth+140)continue;
   drawWorldTree(tree);
  }
  if(!boss)for(const p of platforms){
-  if(p.moving||p.x+p.w<camera-30||p.x>camera+W+30)continue;
+  if(p.moving||p.x+p.w<camera-30||p.x>camera+viewWidth+30)continue;
   if(drawCloudPlatform(p))continue;
   x.fillStyle='#9a9f9d';x.strokeStyle='#4f5c58';x.lineWidth=3;x.beginPath();x.moveTo(p.x,p.y+p.h);x.lineTo(p.x+7,p.y+10);x.lineTo(p.x+18,p.y);x.lineTo(p.x+p.w-18,p.y);x.lineTo(p.x+p.w-4,p.y+13);x.lineTo(p.x+p.w,p.y+p.h);x.closePath();x.fill();x.stroke();
   x.strokeStyle='#c9d0c8';x.beginPath();x.moveTo(p.x+18,p.y+8);x.lineTo(p.x+p.w-23,p.y+8);x.stroke();
  }
  x.restore();
 }
-function draw(){updateHintVisibility();x.clearRect(0,0,W,H);drawBackground();
+function draw(){resizeGameCanvas();updateHintVisibility();beginWorldFrame();x.clearRect(0,-viewOffsetY,viewWidth,viewHeight);drawBackground();beginUiFrame();
  if(['start','levelselect','choose','buddy'].includes(screen)){x.fillStyle='#6abb54';x.fillRect(0,ground,W,H-ground)}
  if(screen==='start'){drawStart();return}
  if(screen==='levelselect'){drawLevelSelect();return}
  if(screen==='choose'){drawChoose();return}
  if(screen==='buddy'){drawBuddyChoose();return}
  shakeX=Math.sin(tick*2.5)*shake*.5;shakeY=Math.cos(tick*3)*shake*.3;
- x.save();x.translate(-camera+shakeX,-cameraY+shakeY);drawTerrainFloors();drawSecretPassages();drawScenery();drawExtraTerrain();drawLava();x.restore();drawGame();
- if(screenFlash>0){x.fillStyle='rgba(255,241,192,'+(screenFlash*.035)+')';x.fillRect(0,0,W,H)}
+ x.save();beginWorldFrame();x.translate(-camera+shakeX,-cameraY+shakeY);drawTerrainFloors();drawSecretPassages();drawScenery();drawExtraTerrain();drawLava();x.restore();drawGame();beginUiFrame();
+ if(screenFlash>0){x.fillStyle='rgba(255,241,192,'+(screenFlash*.035)+')';fillViewport()}
  if(screen==='paused')drawPause();
  if(screen==='over')drawOver();
  if(screen==='victory')drawVictory();
  if(screen==='inventory'||screen==='crafting')drawInventory();
 }
-function drawChoose(){x.fillStyle='rgba(20,20,45,.82)';x.fillRect(0,0,W,H);x.textAlign='center';x.fillStyle='#fff';x.font='bold 48px system-ui';x.fillText('FOOD JUM0',W/2,95);x.font='24px system-ui';x.fillText(worldName(selectedLevel)+' · Wähle deinen Charakter',W/2,137);drawMenuBack();
+function drawChoose(){x.fillStyle='rgba(20,20,45,.82)';fillViewport();x.textAlign='center';x.fillStyle='#fff';x.font='bold 48px system-ui';x.fillText('FOOD JUM0',W/2,95);x.font='24px system-ui';x.fillText(worldName(selectedLevel)+' · Wähle deinen Charakter',W/2,137);drawMenuBack();
  chars.forEach((ch,i)=>{let px=80+i*175, chosen=i===selected;x.fillStyle=chosen?'#fff4a3':'#ffffff';x.fillRect(px,185,145,245);x.strokeStyle=chosen?'#ff8b22':'#56567a';x.lineWidth=chosen?7:3;x.strokeRect(px,185,145,245);sprite(ch.art,px+29,196,87,104);x.fillStyle='#25253c';x.font='bold 19px system-ui';x.fillText(ch.name,px+72,305);x.font='15px system-ui';x.fillText(ch.ability,px+72,336);wrap(ch.text,px+14,365,116,17,'#25253c')});
  x.fillStyle='#fff';x.font='20px system-ui';x.fillText('Klicke eine Figur an oder nutze ← → und Enter',W/2,495);x.font='16px system-ui';x.fillText('Auf dem Handy: Figur antippen',W/2,525);
 }
 function wrap(t,px,py,width,line,color){x.fillStyle=color;x.font='14px system-ui';let words=t.split(' '),row='',y=py;for(let w of words){if(x.measureText(row+w).width>width){x.fillText(row,px+width/2,y);row='';y+=line}row+=w+' '}x.fillText(row,px+width/2,y)}
 function drawGame(){
+ beginUiFrame(true);
  x.fillStyle='rgba(0,0,0,.42)';x.fillRect(15,15,270,74);x.fillStyle='#fff';x.textAlign='left';x.font='bold 19px system-ui';x.fillText(chars[selected].name+'  Punkte: '+player.score,27,42);x.fillStyle='#472535';x.fillRect(27,58,190,16);x.fillStyle='#f34d55';x.fillRect(27,58,190*(player.hp/MAX_HP),16);x.fillStyle='#fff';x.font='14px system-ui';x.fillText('HP: '+player.hp+'/'+MAX_HP+'   '+chars[selected].ability+(player.cooldown?' ('+Math.ceil(player.cooldown/60)+')':''),27,84);
  x.textAlign='center';x.font='bold 20px system-ui';x.fillStyle=undergroundTrip||['crystal','moon','water'].includes(worldSettings().theme)?'#eff1cd':'#203b52';x.fillText(worldName(),W/2+70,38);
  if(!boss){x.textAlign='right';x.font='16px system-ui';x.fillText((undergroundTrip?'Kanal':isTutorial()?'Totarial':'Welt '+level)+' · '+Math.min(100,Math.round(player.x/doorX*100))+' %',W-20,75)}
  drawItemHud();drawBossHud();drawPuddingStatus();
- x.save();x.translate(-camera+shakeX,-cameraY+shakeY);drawKitchenWeather();
- for(const flow of objects)if(flow.type==='colaFlow'&&flow.life>0&&flow.x+flow.w>camera-40&&flow.x<camera+W+40)drawColaFlow(flow);
+ x.save();beginWorldFrame();x.translate(-camera+shakeX,-cameraY+shakeY);drawKitchenWeather();
+ for(const flow of objects)if(flow.type==='colaFlow'&&flow.life>0&&flow.x+flow.w>camera-40&&flow.x<camera+viewWidth+40)drawColaFlow(flow);
  for(const o of objects){
-  if((o.life!==undefined&&o.life<=0)||o.x+o.w<camera-60||o.x>camera+W+60)continue;
+  if((o.life!==undefined&&o.life<=0)||o.x+o.w<camera-60||o.x>camera+viewWidth+60)continue;
   if(o.type==='lunchbox'){x.save();if(o.used)x.globalAlpha=.5;sprite('lunchbox',o.x,o.y-7,o.w,o.h+10);if(o.used)sprite(o.item,o.x+16,o.y-22,28,28);x.restore()}
   if(o.type==='material'&&!o.collected)drawMaterial(o.material,o.x,o.y,o.w);
   if(o.type==='looseItem')drawLoosePickup(o);
@@ -371,7 +373,7 @@ function drawGame(){
   if(o.type==='hat')sprite('hat',o.x-5,o.y-12,34,38);
   if(o.type==='mentos'){x.fillStyle=o.taco?'#91d064':o.spore?'#a5d97b':'#fff9cf';x.strokeStyle=o.spore?'#467751':'#7c713e';x.lineWidth=2;x.beginPath();x.arc(o.x+7,o.y+7,6,0,7);x.fill();x.stroke()}
  }
- for(const e of enemies){if(e.dead||e.x<camera-80||e.x>camera+W+80)continue;if(e.type==='maki')drawMakiEnemy(e);else if(isSwimming())drawSwimmingSprite(e.type,e.x-9,e.y-23,e.w+18,e.h+28,tick*.08+e.x*.01);else if(e.type==='pudding'){x.save();x.translate(e.x+e.w/2,e.y+e.h);const wobble=Math.sin(tick*.14)*(e.wobble>0?.12:.035);e.wobble=Math.max(0,(e.wobble||0)-1);x.scale(1+wobble,1-wobble);sprite(e.type,-37,-64,74,65);x.restore()}else sprite(e.type,e.x-9,e.y-23,60,70)}
+ for(const e of enemies){if(e.dead||e.x<camera-80||e.x>camera+viewWidth+80)continue;if(e.type==='maki')drawMakiEnemy(e);else if(isSwimming())drawSwimmingSprite(e.type,e.x-9,e.y-23,e.w+18,e.h+28,tick*.08+e.x*.01);else if(e.type==='pudding'){x.save();x.translate(e.x+e.w/2,e.y+e.h);const wobble=Math.sin(tick*.14)*(e.wobble>0?.12:.035);e.wobble=Math.max(0,(e.wobble||0)-1);x.scale(1+wobble,1-wobble);sprite(e.type,-37,-64,74,65);x.restore()}else sprite(e.type,e.x-9,e.y-23,60,70)}
  drawTutorialMarkers();
  if(!boss&&!undergroundTrip){sprite('door',doorX,ground-142,106,149);x.fillStyle=door?'#203b52':'#715047';x.font='bold 15px system-ui';x.textAlign='center';x.fillText(showGameplayHints()?(player.hasKey?'W = HAUPTMENÜ':'SCHLÜSSEL FINDEN'):'BOSS',doorX+53,ground-153)}
  drawBossWarning();drawBossBodies();
@@ -394,11 +396,12 @@ function drawGame(){
  drawWorldWind();drawCloudRain();
  if(screen==='play')drawTutorialPanel();
  // mobile controls (screen coordinates, independent of camera)
- buttons=[{id:'left',x:25,y:H-85,w:64,h:55,label:'←'},{id:'right',x:98,y:H-85,w:64,h:55,label:'→'},{id:'item',x:W-246,y:H-85,w:64,h:55,label:'F'},{id:'jump',x:W-170,y:H-85,w:64,h:55,label:'↑'},{id:'ability',x:W-94,y:H-85,w:70,h:55,label:'★'}];
- buttons.push({id:'inventory',x:W-326,y:H-85,w:64,h:55,label:'I'},{id:'pause',x:W-94,y:H-134,w:70,h:38,label:'II'});
- if(nearBossDoor()||nearbyCatapult()||nearbyManhole()||nearbySecretExit()||nearbySewerTreasure()||nearbyLadder()||player.climbing||nearbyTutorialStation())buttons.push({id:'interact',x:W-406,y:H-85,w:70,h:55,label:'W'});
- if(isSwimming())buttons.push({id:'climbUp',x:25,y:H-150,w:64,h:55,label:'↑'});
- if(isSwimming()||nearbyLadder()||player.climbing)buttons.push({id:'climbDown',x:98,y:H-150,w:64,h:55,label:'↓'});
+ const left=-viewOffsetX,right=W+viewOffsetX,bottom=viewHeight-Math.max(0,44/viewScale-30);
+ buttons=[{id:'left',x:left+25,y:bottom-85,w:64,h:55,label:'←'},{id:'right',x:left+98,y:bottom-85,w:64,h:55,label:'→'},{id:'item',x:right-246,y:bottom-85,w:64,h:55,label:'F'},{id:'jump',x:right-170,y:bottom-85,w:64,h:55,label:'↑'},{id:'ability',x:right-94,y:bottom-85,w:70,h:55,label:'★'}];
+ buttons.push({id:'inventory',x:right-326,y:bottom-85,w:64,h:55,label:'I'},{id:'pause',x:right-94,y:bottom-134,w:70,h:38,label:'II'});
+ if(nearBossDoor()||nearbyCatapult()||nearbyManhole()||nearbySecretExit()||nearbySewerTreasure()||nearbyLadder()||player.climbing||nearbyTutorialStation())buttons.push({id:'interact',x:right-406,y:bottom-85,w:70,h:55,label:'W'});
+ if(isSwimming())buttons.push({id:'climbUp',x:left+25,y:bottom-150,w:64,h:55,label:'↑'});
+ if(isSwimming()||nearbyLadder()||player.climbing)buttons.push({id:'climbDown',x:left+98,y:bottom-150,w:64,h:55,label:'↓'});
  for(const b of buttons){x.fillStyle='rgba(30,30,60,.55)';x.fillRect(b.x,b.y,b.w,b.h);x.fillStyle='#fff';x.font='30px system-ui';x.textAlign='center';x.fillText(b.label,b.x+b.w/2,b.y+29);if(['ability','item','door','inventory','interact','climbUp','climbDown'].includes(b.id)){x.font='10px system-ui';x.fillText(b.id==='ability'?'SPEZIAL / E':b.id==='item'?'ITEM / F':b.id==='inventory'?'BAG / I':b.id==='interact'?'NUTZEN / W':b.id==='climbUp'?'HOCH / W':b.id==='climbDown'?'RUNTER / S':'TÜR / Q',b.x+b.w/2,b.y+47)}}
 }
 function gameOverAction(action){
@@ -408,7 +411,7 @@ function gameOverAction(action){
 }
 function handleGameOverKey(e){if(e.repeat)return;const key=e.key.toLowerCase();if(key==='enter'||key==='r'||key===' ')gameOverAction('retry');if(key==='m'||key==='escape')gameOverAction('menu')}
 function drawOver(){
- x.save();x.fillStyle='rgba(16,14,35,.9)';x.fillRect(0,0,W,H);x.fillStyle='#fff1cc';x.textAlign='center';x.font='bold 52px system-ui';x.fillText('Spiel vorbei!',W/2,205);x.fillStyle='#fff';x.font='23px system-ui';x.fillText(worldName()+' · Punkte: '+player.score,W/2,254);
+ x.save();x.fillStyle='rgba(16,14,35,.9)';fillViewport();x.fillStyle='#fff1cc';x.textAlign='center';x.font='bold 52px system-ui';x.fillText('Spiel vorbei!',W/2,205);x.fillStyle='#fff';x.font='23px system-ui';x.fillText(worldName()+' · Punkte: '+player.score,W/2,254);
  overButtons=[{id:'retry',x:275,y:305,w:450,h:58,label:'Nochmal spielen (R / Enter)'},{id:'menu',x:275,y:388,w:450,h:58,label:'Hauptmenü (M / Esc)'}];for(const b of overButtons)drawMenuButton(b);x.restore();
 }
 function togglePause(){
@@ -416,7 +419,7 @@ function togglePause(){
  keys={};heldPointers.clear();lastFrame=null;accumulator=0;playSound('menu');
 }
 function drawPause(){
- x.fillStyle='rgba(17,24,40,.8)';x.fillRect(0,0,W,H);x.textAlign='center';x.fillStyle='#fff1c3';x.font='bold 44px system-ui';x.fillText('PAUSE',W/2,215);
+ x.fillStyle='rgba(17,24,40,.8)';fillViewport();x.textAlign='center';x.fillStyle='#fff1c3';x.font='bold 44px system-ui';x.fillText('PAUSE',W/2,215);
  for(const b of [{y:280,text:'Weiterspielen (Esc)'},{y:355,text:'Hauptmenü'}]){x.fillStyle='#6c967f';x.fillRect(320,b.y,360,55);x.fillStyle='#fff';x.font='22px system-ui';x.fillText(b.text,W/2,b.y+36)}
  x.font='16px system-ui';x.fillStyle='#d5e1d9';x.fillText('Das Spiel ist angehalten.',W/2,452);
 }
@@ -426,7 +429,7 @@ const heldPointers=new Map();
 function syncTouch(){keys.touchJump=[...heldPointers.values()].includes('jump');keys.touchLeft=[...heldPointers.values()].includes('left');keys.touchRight=[...heldPointers.values()].includes('right');keys.touchUp=[...heldPointers.values()].some(id=>id==='climbUp'||id==='interact');keys.touchDown=[...heldPointers.values()].includes('climbDown')}
 c.addEventListener('pointerdown',e=>{
  unlockAudio();e.preventDefault();c.setPointerCapture(e.pointerId);
- const r=c.getBoundingClientRect(),px=(e.clientX-r.left)*W/r.width,py=(e.clientY-r.top)*H/r.height;
+ resizeGameCanvas();beginUiFrame(screen==='play');const {px,py}=canvasUiPoint(e);
  if(['choose','buddy'].includes(screen)&&px>=25&&px<=165&&py>=22&&py<=60){menuAction('back');return}
  if(screen==='start'||screen==='levelselect'){
   if(screen==='start')drawStart();else drawLevelSelect();const b=menuButtons.find(b=>px>=b.x&&px<=b.x+b.w&&py>=b.y&&py<=b.y+b.h);if(b)menuAction(b.id);

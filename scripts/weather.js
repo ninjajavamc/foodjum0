@@ -17,8 +17,9 @@ function applyMarshmallowWindLift(){
 }
 function drawWorldWind(){
  if(!worldWind.active||boss||undergroundTrip)return;
- x.save();x.strokeStyle=worldSettings().theme==='kitchen'?'#7297ab':'#dbeef1';x.lineWidth=2;x.globalAlpha=.45;
- for(let i=0;i<10;i++){const px=((i*157-tick*8)%W+W)%W,py=130+(i*73)%330;x.beginPath();x.moveTo(px,py);x.lineTo(px+48,py);x.quadraticCurveTo(px+65,py,px+59,py-7);x.stroke()}
+ const W=viewWidth,H=viewHeight;
+ x.save();x.translate(-viewOffsetX,0);x.strokeStyle=worldSettings().theme==='kitchen'?'#7297ab':'#dbeef1';x.lineWidth=2;x.globalAlpha=.45;
+ for(let i=0;i<10;i++){const px=((i*157-tick*8)%W+W)%W,py=130+(i*73)%Math.max(330,H-180);x.beginPath();x.moveTo(px,py);x.lineTo(px+48,py);x.quadraticCurveTo(px+65,py,px+59,py-7);x.stroke()}
  x.globalAlpha=1;x.fillStyle='rgba(16,45,62,.78)';x.fillRect(W/2-75,103,150,30);x.fillStyle='#f1f5ed';x.font='bold 16px system-ui';x.textAlign='center';x.fillText('WIND · '+Math.ceil(worldWind.remaining/60)+' s',W/2,125);x.restore();
 }
 function startCheeseShower(left,practice=false){

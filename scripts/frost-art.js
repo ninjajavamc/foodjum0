@@ -1,6 +1,7 @@
 // Frozen ice-cream landscape and waffle-cone trees, all drawn locally.
 function drawFrostBackground(){
- const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#95c9ec');sky.addColorStop(1,'#ecf9ff');x.fillStyle=sky;x.fillRect(0,0,W,H);
+ const W=viewWidth,H=viewHeight;
+ const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#95c9ec');sky.addColorStop(1,'#ecf9ff');x.fillStyle=sky;x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);
  for(let layer=0;layer<3;layer++){x.fillStyle=['#c7e0ef','#acd0e5','#8fbdd7'][layer];x.beginPath();x.moveTo(0,H);for(let px=-70;px<W+100;px+=70)x.lineTo(px,300+layer*70-Math.abs(Math.sin((px+camera*(.1+layer*.1))*.005))*110-cameraY*.15);x.lineTo(W,H);x.closePath();x.fill()}
  for(let i=0;i<48;i++){const px=((i*137-camera*.15)%(W+50)+W+50)%(W+50),py=(i*91+tick*.35)%H;x.fillStyle='rgba(255,255,255,.85)';x.beginPath();x.arc(px,py,2+i%2,0,Math.PI*2);x.fill()}
 }

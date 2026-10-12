@@ -1,6 +1,7 @@
 // Original kitchen decoration: no foliage, just giant utensils and a tiled room.
 function drawKitchenBackground(){
- const wall=x.createLinearGradient(0,0,0,H);wall.addColorStop(0,'#f1f6f5');wall.addColorStop(1,'#d5e3e7');x.fillStyle=wall;x.fillRect(0,0,W,H);
+ const W=viewWidth,H=viewHeight;
+ const wall=x.createLinearGradient(0,0,0,H);wall.addColorStop(0,'#f1f6f5');wall.addColorStop(1,'#d5e3e7');x.fillStyle=wall;x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);
  x.strokeStyle='#cbd7d9';x.lineWidth=1;
  for(let px=-90;px<W+90;px+=90){const tx=px-(camera*.12%90);x.beginPath();x.moveTo(tx,0);x.lineTo(tx,H);x.stroke()}
  for(let py=45;py<H;py+=65){x.beginPath();x.moveTo(0,py);x.lineTo(W,py);x.stroke()}

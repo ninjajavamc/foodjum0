@@ -22,7 +22,7 @@ const context=vm.createContext({
  addEventListener:(event,fn)=>handlers.global[event]=fn,
  requestAnimationFrame(){},performance:{now:()=>1000},console
 });
-for(const path of ['scripts/audio.js','scripts/worlds.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/clouds.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
+for(const path of ['scripts/viewport.js','scripts/audio.js','scripts/worlds.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/clouds.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
 vm.runInContext(script,context);
 const run=code=>vm.runInContext(code,context);
 for(const name of run('Object.keys(art)')){
@@ -656,4 +656,41 @@ run('selectedLevel=1;reset();var powerDraws=[],savedPowerSprite=sprite;sprite=(n
 run('powerDraws=[];sprite=(name,...args)=>powerDraws.push(name);player.fireTime=0;player.marshmallowTime=0;drawPlayerPowerIcons();sprite=savedPowerSprite;drawChiliFallback(100,100,24,31)');assert.equal(run('powerDraws.length'),0,'Expired powers have no floating indicators');
 run('selectedLevel=7;reset();for(let i=0;i<1799;i++)updateWorldWind()');assert(run('!worldWind.active'),'Cloud wind waits thirty seconds');run('updateWorldWind()');assert(run('worldWind.active&&worldWind.remaining===300&&worldWind.nextAt===3600'),'Cloud wind comes every thirty seconds for five seconds');
 run('for(let i=0;i<600;i++)updateCloudWeather();draw()');assert(run('cloudRain.active&&cloudRain.remaining===600&&cloudRain.nextAt-cloudRain.time>=1200&&cloudRain.nextAt-cloudRain.time<1800'),'Cloud world has frequent ten-second heavy rain, without cheese damage');
-console.log('PASS: seven selectable worlds, working Cloud Bakery with frequent wind/heavy rain and crumble platforms, reference-style evil kitchen croissant / cloud cotton-candy boss swap, floating chili/marshmallow indicators and all existing mechanics.');
+// The viewport changes visibility, never the physics or the original menu coordinates.
+const viewportBounds=canvas.getBoundingClientRect;
+let viewportPhysics;
+for(const [width,height,dpr] of [[1000,620,1],[1920,1080,1],[2560,1080,1],[1024,768,2],[768,1024,2]]){
+ canvas.getBoundingClientRect=()=>({left:23,top:17,width,height});context.devicePixelRatio=dpr;
+ run('screen="play";selectedLevel=1;reset();enemies=[];objects=[];obstacles.length=0;platforms.length=0;lavaPits.length=0;cliffs.length=0;terraces.length=0;player.x=500;player.onGround=true;draw()');
+ assert.equal(run('W'),1000);assert.equal(run('H'),620);
+ assert(Math.abs(run('viewWidth/viewHeight')-width/height)<1e-10,'Viewport has the real screen ratio');
+ assert(run('viewWidth>=W&&viewHeight>=H'),'View expands rather than cropping the original field');
+ assert(Math.abs(run('viewWidth*viewScale')-width)<1e-8&&Math.abs(run('viewHeight*viewScale')-height)<1e-8,'View fills the window without bars');
+ assert.equal(canvas.width,width*dpr);assert.equal(canvas.height,height*dpr);
+ let matrix;canvasContext.setTransform=(...args)=>matrix=args;
+ run('beginWorldFrame()');assert.equal(matrix[0],matrix[3],'World scale is uniform');
+ assert.equal(matrix[4],0);assert.equal(matrix[5],run('viewOffsetY*viewScale*viewPixelRatio'));
+ run('beginUiFrame()');assert.equal(matrix[0],matrix[3],'Menus also keep their proportions');
+ run('keys={d:true};jump();for(let i=0;i<60;i++)update();keys={};draw()');
+ const physics=run('JSON.stringify([player.x,player.y,player.vx,player.vy,player.hp])');
+ if(viewportPhysics===undefined)viewportPhysics=physics;else assert.equal(physics,viewportPhysics,'Movement and jumping are identical on every screen');
+ for(const b of run('buttons'))assert(b.x+run('viewOffsetX')>=0&&b.x+b.w+run('viewOffsetX')<=run('viewWidth')&&b.y>=0&&b.y+b.h<=run('viewHeight'),'Every touch button remains on screen');
+ const tap=run('var vb=buttons.find(b=>b.id==="jump");var vr=c.getBoundingClientRect();({clientX:vr.left+(vb.x+vb.w/2+viewOffsetX)*viewScale,clientY:vr.top+(vb.y+vb.h/2)*viewScale})');
+ handlers.canvas.pointerdown({pointerId:1200,...tap,preventDefault(){}});assert(run('keys.touchJump'),'Touch jump uses the inverse uniform transform');
+ handlers.canvas.pointerup({pointerId:1200});assert(run('!keys.touchJump'),'Release still ends the held jump');
+ run('screen="levelselect";draw()');
+ const menuTap=run('var vb=menuButtons.find(b=>b.id==="level7");var vr=c.getBoundingClientRect();({clientX:vr.left+(vb.x+vb.w/2+viewOffsetX)*viewScale,clientY:vr.top+(vb.y+vb.h/2+viewOffsetY)*viewScale})');
+ handlers.canvas.pointerdown({pointerId:1201,...menuTap,preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===7'),'Centered menus remain clickable on every screen');
+ run('reset();startBoss();draw()');assert(run('cameraTargetX(player.x,W)===(W-viewWidth)/2'),'The unchanged boss arena is centered in wide views');
+ run('player.x=W+500;update()');assert(run('player.x+player.w<=W'),'Resizing never changes the boss arena bounds');
+}
+canvas.getBoundingClientRect=()=>({left:0,top:0,width:2560,height:1080});context.devicePixelRatio=1;
+run('selectedLevel=1;reset();draw();enemies=[{type:"gummy",x:camera+W+120,y:ground-42,w:42,h:42,hp:2,damage:1,shoot:1000,dead:0}]');
+let extraEnemyDrawn=false;canvasContext.drawImage=image=>{if(image.src.includes('/gummy.svg'))extraEnemyDrawn=true};
+run('draw()');assert(extraEnemyDrawn,'Newly visible enemies are actually rendered beyond the old view width');
+run('terraces.length=0;cliffs.length=0;lavaPits.length=0;obstacles.length=0;platforms.length=0;objects=[];enemies=[];player.x=3000;for(let i=0;i<60;i++)update()');assert(Math.abs(run('camera')-run('cameraTargetX(player.x)'))<2,'Camera follows using the expanded view width');
+const beforeResize=run('JSON.stringify([player.x,player.y,player.hp,player.inventory])');
+canvas.getBoundingClientRect=()=>({left:0,top:0,width:768,height:1024});run('draw()');
+assert.equal(run('JSON.stringify([player.x,player.y,player.hp,player.inventory])'),beforeResize,'Rotating the screen does not teleport or reset the player');
+canvas.getBoundingClientRect=viewportBounds;context.devicePixelRatio=1;run('resizeGameCanvas()');
+console.log('PASS: proportional full-window rendering with expanded camera, retina resolution, unchanged physics and working menu/touch input at 16:10, 16:9, ultrawide and iPad landscape/portrait; seven worlds and all existing mechanics.');

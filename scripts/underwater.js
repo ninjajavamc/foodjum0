@@ -42,7 +42,8 @@ function updateFishstickBoss(b){
  }
 }
 function drawWaterBackground(){
- const sea=x.createLinearGradient(0,0,0,H);sea.addColorStop(0,'#479fc0');sea.addColorStop(.5,'#247695');sea.addColorStop(1,'#164d70');x.fillStyle=sea;x.fillRect(0,0,W,H);
+ const W=viewWidth,H=viewHeight;
+ const sea=x.createLinearGradient(0,0,0,H);sea.addColorStop(0,'#479fc0');sea.addColorStop(.5,'#247695');sea.addColorStop(1,'#164d70');x.fillStyle=sea;x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);
  x.fillStyle='rgba(182,242,255,.1)';for(let i=0;i<6;i++){const px=i*190+Math.sin(tick*.009+i)*20;x.beginPath();x.moveTo(px,0);x.lineTo(px+38,0);x.lineTo(px+150,H);x.lineTo(px-80,H);x.fill()}
  for(let row=0;row<3;row++){x.fillStyle=['#368b9c','#2b7889','#23697a'][row];x.beginPath();x.moveTo(0,H);for(let px=0;px<=W+20;px+=20)x.lineTo(px,350+row*65+Math.sin((px+camera*(.1+row*.1))*.006)*35);x.lineTo(W,H);x.closePath();x.fill()}
  x.strokeStyle='rgba(190,242,255,.5)';x.lineWidth=1.5;for(let i=0;i<35;i++){const px=((i*113-camera*.17)%(W+30)+W+30)%(W+30),py=H-(i*47+tick*.7)%(H+25);x.beginPath();x.arc(px,py,2+i%4,0,Math.PI*2);x.stroke()}

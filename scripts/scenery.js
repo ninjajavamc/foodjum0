@@ -3,6 +3,7 @@ async function toggleFullscreen(){
  try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();const button=document.querySelector('#fullscreenToggle');if(button)button.textContent=document.fullscreenElement?'Vollbild beenden':'Vollbild'}catch(_){/* Fullscreen is optional. */}
 }
 function drawBackground(){
+ const W=viewWidth,H=viewHeight;
  if(undergroundTrip&&!['start','levelselect','choose','buddy'].includes(screen)){drawSewerBackground();return}
  if(isTutorial()&&!MENU_MUSIC_SCREENS.has(screen)){drawTrainingBackground();return}
  if(worldSettings().theme==='cloud'&&!MENU_MUSIC_SCREENS.has(screen)){drawCloudBackground();return}
@@ -11,7 +12,7 @@ function drawBackground(){
  if(worldSettings().theme==='frost'&&!MENU_MUSIC_SCREENS.has(screen)){drawFrostBackground();return}
  if(worldSettings().theme==='kitchen'&&!MENU_MUSIC_SCREENS.has(screen)){drawKitchenBackground();return}
  if(worldSettings().theme==='crystal'&&!MENU_MUSIC_SCREENS.has(screen)){drawCrystalBackground();return}
- const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,isTutorial()?'#98ddda':'#74c9ec');sky.addColorStop(.62,'#c8ecdd');sky.addColorStop(1,'#fff1cf');x.fillStyle=sky;x.fillRect(0,0,W,H);
+ const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,isTutorial()?'#98ddda':'#74c9ec');sky.addColorStop(.62,'#c8ecdd');sky.addColorStop(1,'#fff1cf');x.fillStyle=sky;x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);
  const sunlight=x.createRadialGradient(850,94,10,850,94,100);sunlight.addColorStop(0,'#fff9c7');sunlight.addColorStop(1,'rgba(255,244,183,0)');x.fillStyle=sunlight;x.fillRect(740,0,220,210);x.fillStyle='#fff5b4';x.beginPath();x.arc(850,94,39,0,Math.PI*2);x.fill();
  for(let i=0;i<7;i++){
   const cx=((i*227-camera*.09+performance.now()/1000*3)%(W+350)+(W+350))%(W+350)-160,cy=58+(i%3)*44-cameraY*.06;
@@ -23,7 +24,7 @@ function drawBackground(){
   x.lineTo(W,H);x.closePath();x.fill();
  }
  x.fillStyle='rgba(46,104,89,.25)';
- for(let i=-2;i<12;i++){
+ for(let i=-2;i<Math.ceil(W/125)+2;i++){
   const px=i*125-(camera*.3%125),py=425+Math.sin((i+Math.floor(camera*.3/125))*2)*16-cameraY*.25;
   x.fillRect(px-4,py-55,8,75);x.beginPath();x.ellipse(px,py-67,30,38,0,0,Math.PI*2);x.ellipse(px+20,py-44,28,24,0,0,Math.PI*2);x.ellipse(px-20,py-48,26,25,0,0,Math.PI*2);x.fill();
  }
@@ -56,7 +57,7 @@ function drawWorldTree(tree){
  x.fillStyle='#ffe3a1';x.strokeStyle='#9a7141';x.lineWidth=3;x.beginPath();x.arc(tree.hookX,tree.hookY,6,0,Math.PI*2);x.fill();x.stroke();x.restore();
 }
 function drawGrassStrip(left,right,surface){
- const from=Math.max(left,camera-90),to=Math.min(right,camera+W+90);
+ const from=Math.max(left,camera-90),to=Math.min(right,camera+viewWidth+90);
  if(worldSettings().theme==='cloud'){drawCloudSurface(from,to,surface);return}
  if(worldSettings().theme==='crystal'){
   x.fillStyle='#f5daa0';x.fillRect(from,surface,to-from,13);x.strokeStyle='#d7b77a';x.lineWidth=1.5;

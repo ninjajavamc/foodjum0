@@ -9,8 +9,9 @@ function updateCloudWeather(){
 }
 function drawCloudRain(){
  if(!isCloudWorld()||!cloudRain.active)return;
- x.save();x.strokeStyle='#5089b0';x.lineWidth=1.8;x.globalAlpha=.65;
- for(let i=0;i<65;i++){const px=((i*71-tick*(worldWind.active?5:1))%W+W)%W,py=(i*91+tick*12)%H;x.beginPath();x.moveTo(px,py);x.lineTo(px-(worldWind.active?12:3),py+17);x.stroke()}
+ const W=viewWidth,H=viewHeight;
+ x.save();x.translate(-viewOffsetX,0);x.strokeStyle='#5089b0';x.lineWidth=1.8;x.globalAlpha=.65;
+ for(let i=0;i<Math.ceil(65*W*H/(1000*620));i++){const px=((i*71-tick*(worldWind.active?5:1))%W+W)%W,py=(i*91+tick*12)%H;x.beginPath();x.moveTo(px,py);x.lineTo(px-(worldWind.active?12:3),py+17);x.stroke()}
  x.restore();
 }
 function isCloudWorld(){return level===7&&!undergroundTrip&&!boss}
@@ -35,15 +36,16 @@ function updateCloudPlatforms(){
  }
 }
 function drawCloudBackground(){
- const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,cloudRain.active?'#87a6bd':'#67b7ef');sky.addColorStop(1,'#ddefff');x.fillStyle=sky;x.fillRect(0,0,W,H);
+ const W=viewWidth,H=viewHeight;
+ const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,cloudRain.active?'#87a6bd':'#67b7ef');sky.addColorStop(1,'#ddefff');x.fillStyle=sky;x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);
  x.fillStyle='#fff1b9';x.beginPath();x.arc(855,92,38,0,Math.PI*2);x.fill();
- for(let layer=0;layer<3;layer++)for(let i=-1;i<7;i++){
+ for(let layer=0;layer<3;layer++)for(let i=-1;i<Math.ceil(W/220)+2;i++){
   const px=i*220-(camera*(.08+layer*.07))%220,py=185+layer*145+Math.sin(i*2+layer)*28-cameraY*.1;
   x.fillStyle=['rgba(255,255,255,.45)','rgba(245,251,255,.65)','#edf7ff'][layer];
   x.beginPath();x.ellipse(px,py,110,28,0,0,Math.PI*2);x.ellipse(px-35,py-22,47,39,0,0,Math.PI*2);x.ellipse(px+32,py-28,55,43,0,0,Math.PI*2);x.fill();
  }
  // Tiny distant bakery houses on clouds, never physical obstacles.
- for(let i=0;i<4;i++){
+ for(let i=0;i<Math.ceil(W/340)+1;i++){
   const px=i*340-(camera*.12)%340+70,py=315+(i%2)*45-cameraY*.08;
   x.fillStyle='#cfa877';x.strokeStyle='#957349';x.lineWidth=2;x.fillRect(px,py-60,68,60);x.strokeRect(px,py-60,68,60);
   x.fillStyle='#f5d7ad';x.beginPath();x.moveTo(px-8,py-59);x.quadraticCurveTo(px+34,py-116,px+76,py-59);x.closePath();x.fill();x.stroke();

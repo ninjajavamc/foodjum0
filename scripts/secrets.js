@@ -36,13 +36,13 @@ function openSecretPassages(px,py,radius){
 function nearbySecretExit(){return screen==='play'&&!boss&&!undergroundTrip?objects.find(o=>o.type==='secretExit'&&Math.abs(player.x+player.w/2-o.x-o.w/2)<65&&Math.abs(player.y+player.h-(o.y+o.h))<65):null}
 function useSecretExit(){
  const exit=nearbySecretExit();if(!exit)return false;
- resetTraversalPosition(exit.exitX,floorAtX(exit.exitX));resetCompanion(true);camera=Math.max(0,Math.min(levelWidth-W,player.x-W*.35));cameraY=floorAtX(player.x)-ground;keys={};heldPointers.clear();playSound('menu');return true;
+ resetTraversalPosition(exit.exitX,floorAtX(exit.exitX));resetCompanion(true);camera=cameraTargetX(player.x);cameraY=floorAtX(player.x)-ground;keys={};heldPointers.clear();playSound('menu');return true;
 }
 function drawSecretExit(o){x.save();x.fillStyle='#8fb4b6';x.strokeStyle='#3b6676';x.lineWidth=3;x.fillRect(o.x,o.y,o.w,o.h);x.strokeRect(o.x,o.y,o.w,o.h);x.fillStyle='#fff0b8';x.font='bold 26px system-ui';x.textAlign='center';x.fillText('→',o.x+o.w/2,o.y+38);if(showGameplayHints()){x.font='14px system-ui';x.fillText('W: Abkürzung',o.x+o.w/2,o.y-12)}x.restore()}
 function drawSecretPassages(){
  if(boss)return;
  for(const room of secretPassages){
-  if(room.x+room.w<camera-100||room.x>camera+W+100)continue;
+  if(room.x+room.w<camera-100||room.x>camera+viewWidth+100)continue;
   if(!room.open){sprite('secret-wall',room.wall.x-6,room.wall.y-8,room.wall.w+12,room.wall.h+12);continue}
   x.save();const shade=x.createLinearGradient(0,room.base-10,0,room.base+105);shade.addColorStop(0,'#4c4845');shade.addColorStop(1,'#776657');x.fillStyle=shade;x.fillRect(room.x,room.base-12,room.w,117);
   x.strokeStyle='#b29d7d';x.lineWidth=5;x.beginPath();x.moveTo(room.x,room.base);x.lineTo(room.x,room.base+105);x.lineTo(room.x+room.w,room.base+105);x.lineTo(room.x+room.w,room.base);x.stroke();

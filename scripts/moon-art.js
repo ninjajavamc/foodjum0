@@ -1,5 +1,6 @@
 function drawMoonBackground(){
- x.fillStyle='#151f36';x.fillRect(0,0,W,H);x.fillStyle='#dbe7f4';for(let i=0;i<70;i++)x.fillRect((i*139+17)%W,15+(i*73)%300,i%4?2:3,2);
+ const W=viewWidth,H=viewHeight;
+ x.fillStyle='#151f36';x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);x.fillStyle='#dbe7f4';for(let i=0;i<70;i++)x.fillRect((i*139+17)%W,15+(i*73)%300,i%4?2:3,2);
  x.fillStyle='#7fb4d1';x.beginPath();x.arc(825,103,47,0,Math.PI*2);x.fill();x.fillStyle='#8fb99b';for(let i=0;i<4;i++){x.beginPath();x.ellipse(811+i*9,79+i*13,14,9,i*.6,0,Math.PI*2);x.fill()}
  for(let row=0;row<3;row++){x.fillStyle=['#48566d','#64748a','#8995a5'][row];x.beginPath();x.moveTo(0,H);for(let px=0;px<=W+30;px+=30)x.lineTo(px,350+row*55+Math.sin((px+camera*(.1+row*.13))*.006)*35);x.lineTo(W,H);x.closePath();x.fill()}
 }
