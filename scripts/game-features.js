@@ -228,7 +228,7 @@ function drawVictory(){
  x.textAlign='center';x.fillStyle='#ffe5a0';x.font='900 48px system-ui';x.fillText('GRATULATION!',W/2,142);x.fillStyle='#fff';x.font='24px system-ui';x.fillText(isTutorial()?'Totarial: Übungsboss besiegt!':worldName()+' geschafft!',W/2,190);x.font='18px system-ui';x.fillText('Punkte: '+player.score,W/2,229);
  victoryButtons=[{id:'retry',x:275,y:275,w:450,h:58,label:'Level nochmal  (R / Enter)'},{id:'menu',x:275,y:349,w:450,h:58,label:'Hauptmenü  (M)'},{id:'next',x:275,y:423,w:450,h:58,label:isTutorial()?(tutorialBossRound===1?'Besteck-Trio üben (N)':'Weiter zum Wiesenwald (N)'):LEVEL_SETTINGS[level+1]?'Weiter zu '+worldName(level+1)+' (N)':'Weitere Welten – kommen später',disabled:!LEVEL_SETTINGS[level+1]}];
  for(const b of victoryButtons){x.fillStyle=b.disabled?'#373f54':b.id==='retry'?'#77b49a':'#748fbb';x.fillRect(b.x,b.y,b.w,b.h);x.fillStyle=b.disabled?'#9ca7ba':'#fff';x.font='bold 20px system-ui';x.fillText(b.label,b.x+b.w/2,b.y+37)}
- x.fillStyle='#b8c4cd';x.font='15px system-ui';x.fillText('Totarial · Wiesenwald · Kristallwüste · Küche',W/2,527);x.restore();
+ x.fillStyle='#b8c4cd';x.font='15px system-ui';x.fillText('17 Welten · Totarial · Alle Welten direkt auswählbar',W/2,527);x.restore();
 }
 function drawItemHud(){
  x.save();x.textAlign='left';

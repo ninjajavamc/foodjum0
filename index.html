@@ -19,31 +19,32 @@
 <button id="fullscreenToggle" onclick="toggleFullscreen()">Vollbild</button>
 <div id="hint">PC: A/D oder ←/→ zum Laufen · Leertaste zum Springen · E / ★ Spezial · F / ITEM benutzen · 1–5 Inventare · I Inventar · B Werkbank · Esc Pause · R Ablegen · W Nutzen / Klettern · S Leiter runter</div>
 <a id="credits" href="credits.html" target="_blank">Bildquellen</a>
-<script src="scripts/viewport.js?v=viewport1"></script>
-<script src="scripts/audio.js?v=viewport1"></script>
-<script src="scripts/worlds.js?v=viewport1"></script>
-<script src="scripts/world-art.js?v=viewport1"></script>
-<script src="scripts/kitchen-art.js?v=viewport1"></script>
-<script src="scripts/frost-art.js?v=viewport1"></script>
-<script src="scripts/moon-art.js?v=viewport1"></script>
-<script src="scripts/underwater.js?v=viewport1"></script>
-<script src="scripts/clouds.js?v=viewport1"></script>
-<script src="scripts/pudding.js?v=viewport1"></script>
-<script src="scripts/weather.js?v=viewport1"></script>
-<script src="scripts/game-features.js?v=viewport1"></script>
-<script src="scripts/companions.js?v=viewport1"></script>
-<script src="scripts/crafting.js?v=viewport1"></script>
-<script src="scripts/scenery.js?v=viewport1"></script>
-<script src="scripts/abilities.js?v=viewport1"></script>
-<script src="scripts/structures.js?v=viewport1"></script>
-<script src="scripts/traversal.js?v=viewport1"></script>
-<script src="scripts/sewers.js?v=viewport1"></script>
-<script src="scripts/menus.js?v=viewport1"></script>
-<script src="scripts/bosses.js?v=viewport1"></script>
-<script src="scripts/boss-moves.js?v=viewport1"></script>
-<script src="scripts/dessert-bosses.js?v=viewport1"></script>
-<script src="scripts/secrets.js?v=viewport1"></script>
-<script src="scripts/tutorial.js?v=viewport1"></script>
+<script src="scripts/viewport.js?v=world17"></script>
+<script src="scripts/audio.js?v=world17"></script>
+<script src="scripts/worlds.js?v=world17"></script>
+<script src="scripts/expansion.js?v=world17"></script>
+<script src="scripts/world-art.js?v=world17"></script>
+<script src="scripts/kitchen-art.js?v=world17"></script>
+<script src="scripts/frost-art.js?v=world17"></script>
+<script src="scripts/moon-art.js?v=world17"></script>
+<script src="scripts/underwater.js?v=world17"></script>
+<script src="scripts/clouds.js?v=world17"></script>
+<script src="scripts/pudding.js?v=world17"></script>
+<script src="scripts/weather.js?v=world17"></script>
+<script src="scripts/game-features.js?v=world17"></script>
+<script src="scripts/companions.js?v=world17"></script>
+<script src="scripts/crafting.js?v=world17"></script>
+<script src="scripts/scenery.js?v=world17"></script>
+<script src="scripts/abilities.js?v=world17"></script>
+<script src="scripts/structures.js?v=world17"></script>
+<script src="scripts/traversal.js?v=world17"></script>
+<script src="scripts/sewers.js?v=world17"></script>
+<script src="scripts/menus.js?v=world17"></script>
+<script src="scripts/bosses.js?v=world17"></script>
+<script src="scripts/boss-moves.js?v=world17"></script>
+<script src="scripts/dessert-bosses.js?v=world17"></script>
+<script src="scripts/secrets.js?v=world17"></script>
+<script src="scripts/tutorial.js?v=world17"></script>
 <script>
 const c=document.querySelector('#game'), x=c.getContext('2d');
 const W=1000,H=620,ground=525,MAX_HP=20,WORLD_BOTTOM=1100;
@@ -90,12 +91,12 @@ function spawnLevel(){
  objects.push({type:'key',x:keyX,y:floorAtX(keyX)-60,w:34,h:46,collected:false});
  const count=LEVEL_SETTINGS[level].enemies;
  for(let i=0;i<count;i++){
-  const types=level>=5?['gummy','pudding','honey','lemon','taco','maki']:level>=4?['gummy','pudding','honey','lemon','taco']:['gummy','honey','lemon'],type=types[i%types.length];let pos=560+i*(levelWidth-1050)/(count-1);
+  const types=worldEnemyTypes(),type=types[i%types.length];let pos=560+i*(levelWidth-1050)/(count-1);
   const pit=[...lavaPits,...cliffs].find(l=>pos+58>l.x&&pos<l.x+l.w);if(pit)pos=pit.x+pit.w+65;
   enemies.push({type,x:pos,y:floorAtX(pos)-(type==='maki'?58:type==='pudding'?46:42),w:type==='maki'?48:type==='pudding'?58:type==='taco'?52:42,h:type==='maki'?58:type==='pudding'?46:42,hp:(type==='taco'||type==='maki')?2:type==='pudding'?3:type==='honey'?(level>=3?3:2):level>=2&&type==='lemon'?2:1,damage:1,vx:0,vy:0,shoot:150+Math.random()*100,dead:0,slow:0});
   if(type==='lemon'){const bottleX=safeColaX(pos-105);if(bottleX!==null)objects.push({type:'cola',x:bottleX,y:floorAtX(bottleX)-145,w:64,h:145,liquid:.9,used:false})}
  }
- generateSecretPassages();generateGreatWalls();generateManholes();decorateCloudWorld();
+ generateSecretPassages();generateGreatWalls();generateManholes();decorateCloudWorld();decorateExtraWorld();
  if(isSwimming()){addWaterHealingMushrooms();player.y-=90;player.onGround=false;for(const e of enemies){e.y-=90+(e.x%110);e.onGround=false}}
  resetCompanion();
 }
@@ -175,7 +176,7 @@ function update(){
   if(o.type==='bananaBoomerang')updateBananaBoomerang(o);
   if(o.type==='catapult')updateCatapult(o);
   if(o.type==='catapultRock')updateCatapultRock(o);
-  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot','stormBolt'].includes(o.type))updateBossProjectile(o);
+  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot','stormBolt','banquetShot'].includes(o.type))updateBossProjectile(o);
   if(o.type==='cheeseDrop')updateCheeseDrop(o);
   if(o.type==='material')collectWorldLoot(o);
   if(o.type==='looseItem')updateLooseItem(o);
@@ -202,8 +203,8 @@ function update(){
  objects=objects.filter(o=>o.life===undefined||o.life>0);
  for(const e of enemies){
   if(e.dead)continue;
-  e.shoot--;e.slow=Math.max(0,e.slow-1);e.colaCooldown=Math.max(0,(e.colaCooldown||0)-1);let d=p.x-e.x;
-  const direction=(d>0?1:-1)*(e.slow?-1:1),speed=(e.slow?.25:(e.type==='gummy'?.85:e.type==='donut'?.9:e.type==='maki'?.65:.35))*worldSettings().enemySpeed;
+  e.shoot--;updateExtraEnemy(e,p.x-e.x);e.slow=Math.max(0,e.slow-1);e.colaCooldown=Math.max(0,(e.colaCooldown||0)-1);let d=p.x-e.x;
+  const direction=(d>0?1:-1)*(e.slow?-1:1),speed=(e.slow?.25:(EXTRA_ENEMIES[e.type]?.speed??(e.type==='gummy'?.85:e.type==='donut'?.9:e.type==='maki'?.65:.35)))*worldSettings().enemySpeed;
   e.vy=e.vy||0;const previousEnemyX=e.x,previousEnemyY=e.y;
   if(isSwimming())updateSwimmingEnemy(e,direction,speed,previousEnemyX,previousEnemyY);
   else{
@@ -251,8 +252,8 @@ function update(){
  const targetY=boss&&level!==5?0:Math.min(floorAtX(p.x+p.w/2)-ground,p.y-170);cameraY+=(targetY-cameraY)*.1;
 }
 const art={};
-for(const name of ['spaghetti','mandarine','banane','kartoffel','granatapfel','honey','lemon','peel','cola','hat','door','boss','gummy','lunchbox','mushroom','gum','wasabi','mandarin-piece','sponge','sausage-dog','key','toothpaste','toothbrush','material-sugar','material-herbs','material-spice','material-stone','material-spoon','material-wood','catapultKit','wallKit','boss-fork','boss-spoon','boss-knife','springKit','secret-wall','ladderKit','moldCheese','donut','boss-cotton','boss-popcorn','boss-bigmac','pudding','taco','boss-fishstick','maki','marshmallow','boss-croissant','chili']){
- const image=new Image(); image.src='assets/sprites/'+name+'.svg?v=viewport1'; art[name]=image;
+for(const name of ['spaghetti','mandarine','banane','kartoffel','granatapfel','honey','lemon','peel','cola','hat','door','boss','gummy','lunchbox','mushroom','gum','wasabi','mandarin-piece','sponge','sausage-dog','key','toothpaste','toothbrush','material-sugar','material-herbs','material-spice','material-stone','material-spoon','material-wood','catapultKit','wallKit','boss-fork','boss-spoon','boss-knife','springKit','secret-wall','ladderKit','moldCheese','donut','boss-cotton','boss-popcorn','boss-bigmac','pudding','taco','boss-fishstick','maki','marshmallow','boss-croissant','chili',...Object.keys(EXTRA_ENEMIES),...Object.values(EXTRA_WORLDS).map(d=>d.art)]){
+ const image=new Image(); image.src='assets/sprites/'+name+'.svg?v=world17'; art[name]=image;
 }
 function sprite(name,left,top,width,height){
  const image=art[name];
@@ -346,7 +347,7 @@ function wrap(t,px,py,width,line,color){x.fillStyle=color;x.font='14px system-ui
 function drawGame(){
  beginUiFrame(true);
  x.fillStyle='rgba(0,0,0,.42)';x.fillRect(15,15,270,74);x.fillStyle='#fff';x.textAlign='left';x.font='bold 19px system-ui';x.fillText(chars[selected].name+'  Punkte: '+player.score,27,42);x.fillStyle='#472535';x.fillRect(27,58,190,16);x.fillStyle='#f34d55';x.fillRect(27,58,190*(player.hp/MAX_HP),16);x.fillStyle='#fff';x.font='14px system-ui';x.fillText('HP: '+player.hp+'/'+MAX_HP+'   '+chars[selected].ability+(player.cooldown?' ('+Math.ceil(player.cooldown/60)+')':''),27,84);
- x.textAlign='center';x.font='bold 20px system-ui';x.fillStyle=undergroundTrip||['crystal','moon','water'].includes(worldSettings().theme)?'#eff1cd':'#203b52';x.fillText(worldName(),W/2+70,38);
+ x.textAlign='center';x.font='bold 20px system-ui';x.fillStyle=worldHudColor();x.fillText(worldName(),W/2+70,38);
  if(!boss){x.textAlign='right';x.font='16px system-ui';x.fillText((undergroundTrip?'Kanal':isTutorial()?'Totarial':'Welt '+level)+' · '+Math.min(100,Math.round(player.x/doorX*100))+' %',W-20,75)}
  drawItemHud();drawBossHud();drawPuddingStatus();
  x.save();beginWorldFrame();x.translate(-camera+shakeX,-cameraY+shakeY);drawKitchenWeather();
@@ -361,7 +362,7 @@ function drawGame(){
   if(o.type==='buddyCola')drawBuddyCola(o);
   if(o.type==='buddyFoam')drawBuddyFoam(o);
   if(o.type==='bananaBoomerang')drawBananaBoomerang(o);
-  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot','stormBolt'].includes(o.type))drawBossProjectile(o);
+  if(['bossWave','cutleryShot','bossHeavyWave','sugarPuff','explosivePopcorn','popcornBlast','pickleShot','crumbShot','stormBolt','banquetShot'].includes(o.type))drawBossProjectile(o);
   if(['catapult','stonewall','greatWall','ladder','sewerLadder','catapultRock'].includes(o.type))drawStructure(o);
   if(['manhole','manholeOutlet','sewerExit'].includes(o.type))drawManhole(o);
   if(o.type==='cheeseDrop')drawCheeseDrop(o);
@@ -371,9 +372,9 @@ function drawGame(){
   if(o.type==='cola')drawBottle(o);
   if(o.type==='peel')sprite('peel',o.x-5,o.y-26,52,40);
   if(o.type==='hat')sprite('hat',o.x-5,o.y-12,34,38);
-  if(o.type==='mentos'){x.fillStyle=o.taco?'#91d064':o.spore?'#a5d97b':'#fff9cf';x.strokeStyle=o.spore?'#467751':'#7c713e';x.lineWidth=2;x.beginPath();x.arc(o.x+7,o.y+7,6,0,7);x.fill();x.stroke()}
+  if(o.type==='mentos'){x.fillStyle=o.extraEnemy==='pepper'?'#ef8753':o.extraEnemy==='pretzel'?'#ce9b64':o.taco?'#91d064':o.spore?'#a5d97b':'#fff9cf';x.strokeStyle=o.spore?'#467751':'#7c713e';x.lineWidth=2;x.beginPath();x.arc(o.x+7,o.y+7,6,0,7);x.fill();x.stroke()}
  }
- for(const e of enemies){if(e.dead||e.x<camera-80||e.x>camera+viewWidth+80)continue;if(e.type==='maki')drawMakiEnemy(e);else if(isSwimming())drawSwimmingSprite(e.type,e.x-9,e.y-23,e.w+18,e.h+28,tick*.08+e.x*.01);else if(e.type==='pudding'){x.save();x.translate(e.x+e.w/2,e.y+e.h);const wobble=Math.sin(tick*.14)*(e.wobble>0?.12:.035);e.wobble=Math.max(0,(e.wobble||0)-1);x.scale(1+wobble,1-wobble);sprite(e.type,-37,-64,74,65);x.restore()}else sprite(e.type,e.x-9,e.y-23,60,70)}
+ for(const e of enemies){if(e.dead||e.x<camera-80||e.x>camera+viewWidth+80)continue;if(EXTRA_ENEMIES[e.type])drawExtraEnemy(e);else if(e.type==='maki')drawMakiEnemy(e);else if(isSwimming())drawSwimmingSprite(e.type,e.x-9,e.y-23,e.w+18,e.h+28,tick*.08+e.x*.01);else if(e.type==='pudding'){x.save();x.translate(e.x+e.w/2,e.y+e.h);const wobble=Math.sin(tick*.14)*(e.wobble>0?.12:.035);e.wobble=Math.max(0,(e.wobble||0)-1);x.scale(1+wobble,1-wobble);sprite(e.type,-37,-64,74,65);x.restore()}else sprite(e.type,e.x-9,e.y-23,60,70)}
  drawTutorialMarkers();
  if(!boss&&!undergroundTrip){sprite('door',doorX,ground-142,106,149);x.fillStyle=door?'#203b52':'#715047';x.font='bold 15px system-ui';x.textAlign='center';x.fillText(showGameplayHints()?(player.hasKey?'W = HAUPTMENÜ':'SCHLÜSSEL FINDEN'):'BOSS',doorX+53,ground-153)}
  drawBossWarning();drawBossBodies();

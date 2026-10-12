@@ -2,7 +2,8 @@ function bossTargets(){return !boss||boss.dead?[]:boss.members?boss.members.filt
 function bossBodyDistance(px,py,b){return Math.hypot(Math.max(b.x-px,0,px-b.x-b.w),Math.max(b.y-py,0,py-b.y-b.h))}
 function findBossTarget(px,py,range){return bossTargets().filter(b=>b.hp>0&&bossBodyDistance(px,py,b)<range).sort((a,b)=>bossBodyDistance(px,py,a)-bossBodyDistance(px,py,b))[0]}
 function beginBossFight(){
- if(level>=3){
+ if(extraWorld())boss=createExtraBoss();
+ else if(level>=3){
   const artName={3:'boss-croissant',4:'boss-popcorn',5:'boss-bigmac',6:'boss-fishstick',7:'boss-cotton'}[level],hp={3:40,4:46,5:54,6:62,7:70}[level],height=level===6?220:level===5?160:level===4?122:110;
   boss={art:artName,x:650,y:ground-height-([3,6,7].includes(level)?140:0),w:level===6?90:[3,7].includes(level)?150:level===5?138:116,h:height,hp,max:hp,vx:-1.2,vy:0,jumpTimer:75,attack:130,flash:0,damage:2,dead:false,phase:1,isBoss:true,flying:[3,7].includes(level),swimming:level===6,flightTime:0,swoop:0};
  }else if(level===2||(isTutorial()&&tutorialBossRound===2)){
@@ -11,10 +12,11 @@ function beginBossFight(){
  }else boss={art:'boss',x:720,y:ground-116,w:130,h:116,hp:19,max:19,vx:-1.15,vy:0,jumpTimer:60,attack:180,flash:0,damage:2,dead:false,phase:1,isBoss:true};
  enemies=[];objects=[];
  if(isSwimming())for(const px of [270,875])objects.push({type:'looseItem',item:'mushroom',x:px,y:ground-34,w:34,h:34,life:Infinity,delay:0});
- defeated=[];mandarinBabies=[];door=false;camera=0;cameraY=0;player.x=150;player.y=ground-player.h-(isSwimming()?90:0);player.onGround=false;player.vx=0;player.vy=0;player.swing=null;player.climbing=null;player.seatedCatapult=null;player.launchFrames=0;player.inv=110;resetCompanion(true);playSound('boss');message='BOSS: '+({2:'Das Besteck-Trio',3:'Gewitter-Croissant',4:'Popcorn',5:'Triple Bigmac',6:'Riesen-Fischstäbchen',7:'Fliegende Zuckerwatte'}[level]||'Kartoffelpüree-Bär')+'!';
+ defeated=[];mandarinBabies=[];door=false;camera=0;cameraY=0;player.x=150;player.y=ground-player.h-(isSwimming()?90:0);player.onGround=false;player.vx=0;player.vy=0;player.swing=null;player.climbing=null;player.seatedCatapult=null;player.launchFrames=0;player.inv=110;resetCompanion(true);playSound('boss');message='BOSS: '+worldBossName(level)+'!';
 }
 function makeBossWave(px,direction){objects.push({type:'bossWave',x:px,y:ground-25,w:26,h:25,vx:direction*4.2,life:160})}
 function updateBossProjectile(o){
+ if(o.type==='banquetShot'){updateBanquetShot(o);return}
  o.x+=o.vx;if(o.type==='crumbShot'||o.type==='stormBolt')o.y+=o.vy;
  if(['cutleryShot','sugarPuff','pickleShot'].includes(o.type)){o.vy+=o.type==='sugarPuff'?.065:o.type==='pickleShot'?.1*worldGravity()/.58:.08;o.y+=o.vy}
  if(o.type==='explosivePopcorn'){o.vy+=.18;o.y+=o.vy;o.fuse--;if(rect(player,o)||o.y+o.h>=ground||o.fuse<=0){explodePopcorn(o);return}}
@@ -39,7 +41,8 @@ function updateBossFight(previousBottom){
  for(const b of bossTargets()){
   if(b.hp<=0){b.dead=true;defeated.push({art:b.art,x:b.x+b.w/2,y:b.y+45,vx:0,vy:-3,angle:0,life:55,maxLife:55,size:120});continue}
   if(b.swimming)updateFishstickBoss(b);else if(b.flying)updateCottonFlight(b);else updateBossJump(b);b.attack-=level>=3?1.25:level===2?1.15:isTutorial()?.85:1;b.flash=Math.max(0,b.flash-1);
-  if(b.swimming){/* Movement and crumb volleys are updated together above. */}
+  if(b.extra)updateExtraBoss(b);
+  else if(b.swimming){/* Movement and crumb volleys are updated together above. */}
   else if(b.art==='boss-croissant'){if(b.attack<=0)fireCroissantBolts(b)}
   else if(b.art==='boss-cotton'){if(b.attack<=0)fireSugarPuffs(b)}
   else if(b.art==='boss-popcorn'||b.art==='boss-bigmac'){
@@ -64,14 +67,15 @@ function updateBossFight(previousBottom){
  if(boss.members)boss.hp=boss.members.reduce((sum,b)=>sum+Math.max(0,b.hp),0);
 }
 function drawBossBodies(){
- for(const b of bossTargets()){const size=b.art==='boss-fishstick'?[210,264,18,60]:['boss-cotton','boss-croissant'].includes(b.art)?[166,148,12]:b.art==='boss-popcorn'?[134,148,13]:b.art==='boss-bigmac'?[154,180,15]:b.art==='boss'?[146,154,34]:[82,132,15];sprite(b.art,b.x-(size[3]||8),b.y-size[2],size[0],size[1]);if(b.flash>0){x.strokeStyle='#fff4ce';x.lineWidth=3;x.strokeRect(b.x,b.y,b.w,b.h)}}
+ for(const b of bossTargets()){const size=b.extra?[158,178,20,15]:b.art==='boss-fishstick'?[210,264,18,60]:['boss-cotton','boss-croissant'].includes(b.art)?[166,148,12]:b.art==='boss-popcorn'?[134,148,13]:b.art==='boss-bigmac'?[154,180,15]:b.art==='boss'?[146,154,34]:[82,132,15];sprite(b.art,b.x-(size[3]||8),b.y-size[2],size[0],size[1]);if(b.flash>0){x.strokeStyle='#fff4ce';x.lineWidth=3;x.strokeRect(b.x,b.y,b.w,b.h)}}
 }
 function drawBossHud(){
  if(!boss)return;
  const left=330,width=370,hp=boss.members?boss.members.reduce((sum,b)=>sum+Math.max(0,b.hp),0):Math.max(0,boss.hp);
- x.save();x.fillStyle='#293346';x.fillRect(left,56,width,16);x.fillStyle=boss.phase===2?'#eb755b':'#d6576b';x.fillRect(left,56,width*Math.min(1,hp/boss.max),16);x.strokeStyle='#ffe4ac';x.lineWidth=2;x.strokeRect(left,56,width,16);x.fillStyle=['crystal','moon','water'].includes(worldSettings().theme)?'#fff0d6':'#23334c';x.font='bold 13px system-ui';x.textAlign='center';x.fillText((boss.members?'Besteck-Trio':({'boss-croissant':'Gewitter-Croissant','boss-cotton':'Zuckerwatte','boss-popcorn':'Popcorn','boss-bigmac':'Triple Bigmac','boss-fishstick':'Riesen-Fischstäbchen'}[boss.art]||'Püree-Bär'))+' · '+hp+'/'+boss.max+' HP'+(boss.phase===2?' · PHASE 2':''),left+width/2,91);x.restore();
+ x.save();x.fillStyle='#293346';x.fillRect(left,56,width,16);x.fillStyle=boss.phase===2?'#eb755b':'#d6576b';x.fillRect(left,56,width*Math.min(1,hp/boss.max),16);x.strokeStyle='#ffe4ac';x.lineWidth=2;x.strokeRect(left,56,width,16);x.fillStyle=worldHudColor();x.font='bold 13px system-ui';x.textAlign='center';x.fillText((boss.members?'Besteck-Trio':worldBossName(level))+' · '+hp+'/'+boss.max+' HP'+(boss.phase===2?' · PHASE 2':''),left+width/2,91);x.restore();
 }
 function drawBossProjectile(o){
+ if(o.type==='banquetShot'){drawBanquetShot(o);return}
  if(o.type==='stormBolt'){drawCroissantBolt(o);return}
  if(o.type==='crumbShot'){x.fillStyle='#f8cf77';x.strokeStyle='#ac753c';x.lineWidth=2;x.beginPath();x.ellipse(o.x+9,o.y+7,9,7,0,0,Math.PI*2);x.fill();x.stroke();return}
  if(o.type==='sugarPuff'){drawSugarPuff(o);return}

@@ -10,7 +10,7 @@ Auf dem iPad in **Safari**, am PC z. B. in **Chrome** öffnen. Auf dem iPad am b
 Veröffentlichung: GitHub Pages, Branch `main`, Ordner `/ (root)`. `.nojekyll` sorgt für direkte Bereitstellung der statischen Dateien. Nach einem Push kann die Aktualisierung einige Minuten dauern.
 
 ## Start
-Startbildschirm → Welt-Auswahl → Charakter → Begleiter → Spiel. **Totarial** und alle sieben Welten von **Wiesenwald** bis **Wolken-Bäckerei** können direkt ausgewählt werden; Tasten **1–7** wählen eine normale Welt. **Multiplayer – kommt noch** ist sichtbar, aber noch deaktiviert. Bei „Spiel vorbei“ gibt es **Nochmal spielen** und **Hauptmenü**.
+Startbildschirm → Welt-Auswahl → Charakter → Begleiter → Spiel. **Totarial** und alle **17 Welten** von **Wiesenwald** bis **Mitternachts-Buffet** können direkt ausgewählt werden. Drei Seiten zeigen jeweils bis zu sieben Karten; **Weiter / Zurück** wechselt die Seite, **1–7** wählt eine Karte der aktuellen Seite. Mit **← / → und Enter** kann man durch alle Welten gehen. **Multiplayer – kommt noch** ist sichtbar, aber noch deaktiviert. Bei „Spiel vorbei“ gibt es **Nochmal spielen** und **Hauptmenü**.
 
 ## Steuerung
 - **T / 0 im Hauptmenü oder der Welt-Auswahl:** Totarial auswählen
@@ -31,9 +31,9 @@ Startbildschirm → Welt-Auswahl → Charakter → Begleiter → Spiel. **Totari
 - **Ton-Button:** Soundeffekte und Musik an/aus
 
 ## Totarial – die Lernwelt
-Ein festes, sicheres Übungscamp mit **25 Stationen** erklärt Laufen und Touch-Tasten, Springen, Lava, Klippen, Stacheln, Plattformen, Stampfer, Leben, alle Powers, alle fünf Charakterfähigkeiten, alle vier Begleiter, Cola/Mentos, geheime Gänge, Materialien, beide Inventare, alle Werkbank-Rezepte, Leitern, Mauern, Spieler-Katapulte, Gullys, Kanalisation, Schlüssel, Käseregen, Wackelpudding, Mond-Schwerkraft und die fünf Bosse (Erklärungen).
+Ein festes, sicheres Übungscamp mit **25 Stationen** erklärt Laufen und Touch-Tasten, Springen, Lava, Klippen, Stacheln, Plattformen, Stampfer, Leben, alle Powers, alle fünf Charakterfähigkeiten, alle vier Begleiter, Cola/Mentos, geheime Gänge, Materialien, beide Inventare, alle Werkbank-Rezepte, Leitern, Mauern, Spieler-Katapulte, Gullys, Kanalisation, Schlüssel, Käseregen, Wackelpudding, Mond-Schwerkraft und die grundlegenden Bossmechaniken (Erklärungen).
 
-Mit **W / NUTZEN** an Stationen den Charakter wechseln, Powers ausprobieren und Baumaterialien auffüllen. Bei 0 HP wird man im Tutorial mit vollen Leben wiederbelebt, ohne Besitz zu verlieren. Am Ende den Schlüssel sammeln und die Boss-Tür mit W öffnen: In Totarial führt sie direkt ins Hauptmenü, ohne Bosskampf. Die echten Bosskämpfe finden in den sieben normalen Welten statt. Die Erklärungen bleiben ausschließlich in Totarial; normale Welten zeigen keine schwebenden Lerntexte oder Bau-/Gully-Anleitungen. Bedientasten, Inventar- und Werkbank-Menüs bleiben nutzbar.
+Mit **W / NUTZEN** an Stationen den Charakter wechseln, Powers ausprobieren und Baumaterialien auffüllen. Bei 0 HP wird man im Tutorial mit vollen Leben wiederbelebt, ohne Besitz zu verlieren. Am Ende den Schlüssel sammeln und die Boss-Tür mit W öffnen: In Totarial führt sie direkt ins Hauptmenü, ohne Bosskampf. Die echten Bosskämpfe finden in den 17 normalen Welten statt. Die Erklärungen bleiben ausschließlich in Totarial; normale Welten zeigen keine schwebenden Lerntexte oder Bau-/Gully-Anleitungen. Bedientasten, Inventar- und Werkbank-Menüs bleiben nutzbar.
 
 ## Figuren und Begleiter
 - **Spaghetti:** neue Zeichnung nach der Nudel-Skizze mit zwei großen Augen; zwei Haken-Schwünge, danach fünf Sekunden Abklingzeit. Ein einzelner Schwung dauert maximal zwei Sekunden.
@@ -88,6 +88,26 @@ Die Landschaft wird bei jedem Neustart neu erzeugt: Lava, Klippen, Hindernisse, 
 
 - **Welt 7 – Wolken-Bäckerei:** **12.500 Einheiten, 26 Gegner**, blauer Himmel, schwebende Wolkeninseln, kleine Bäckereien, Brötchen-Plattformen und Keksstapel statt Bäumen/Felsen. Keine Lava: Lücken zwischen den Wolken haben sichere Brötchen-Zwischenplattformen. **Keksplattformen zerbröseln nach 0,75 Sekunden Draufstehen** und erscheinen nach 4 Sekunden erneut. Zusätzliche Marshmallow-Powers helfen beim Gleiten; Hier weht Wind häufiger: **alle 30 Sekunden für 5 Sekunden**. Dazu gibt es **starken Wasserregen**, erstmals nach 10 Sekunden; Regenschauer dauern 10 Sekunden mit nur 10–20 Sekunden Pause. Wasserregen macht keinen direkten HP-Schaden. Boss: **fliegende Zuckerwatte**, aus der Küche hierher versetzt, jetzt 70 HP. Sie schießt Zuckerwolken und stößt herunter. Auch hier einmal eine vermeidbare 10-HP-Attacke bei halben HP.
 
+### Zehn weitere Welten
+Alle zehn haben eigene Paletten, Landschaftsdekoration, vollständig generierte Level, Schlüssel, Geheimgänge, Kanäle und eigene lokale Bosszeichnungen. Länge: 12.500–14.750 Einheiten, 27–36 Gegner. Sichere Zwischenplattformen helfen bei den breiten Lücken; nur der Gewürz-Vulkan hat Lava.
+
+| Welt | Landschaft | Boss | Normaler Angriff |
+| --- | --- | --- | --- |
+| 8 | Tomaten-Gewächshaus | König Ketchup | Samen-Fächer |
+| 9 | Käse-Festung | Käse-Ritter | Ansturm und Bodenwellen |
+| 10 | Pilz-Höhlen | Champignon-Kaiser | Sporen-Salven |
+| 11 | Zucker-Jahrmarkt | Lolli-Magier | Fliegende Zucker-Ringe |
+| 12 | Nudelhafen | Ravioli-Kapitän | Nudel-Kanonenkugeln |
+| 13 | Obst-Dschungel | Ananas-König | Schnelle Nadel-Fächer |
+| 14 | Schoko-Fabrik | Schoko-Golem | Fallende Schokobrocken |
+| 15 | Frühstücksberge | Pfannkuchen-Turm | Hüpfende Beeren |
+| 16 | Gewürz-Vulkan | Chili-Drache | Fliegende Feuer-Salven |
+| 17 | Mitternachts-Buffet | Donut-Herrscher | Fliegende Ring-Salven |
+
+Die neuen Bosse haben 74–110 HP, werden bei halben HP schneller und behalten die Regeln: normale Treffer **2 HP**, genau eine vermeidbare **10-HP-Spezialattacke mit 90 Frames Vorwarnung**. Fliegende Bosse stoßen regelmäßig herab und können dabei gestampft werden. Bossarenen und Physik sind unabhängig vom Bildschirmformat.
+
+**Fünf neue Gegnertypen ab Welt 8**, auch in deren Kanälen: **Radieschen-Hüpfer** (2 HP, hüpft), **Oliven-Flitzer** (2 HP, schnell), **Brezel-Werfer** (3 HP, Krümelgeschosse), **Paprika-Spucker** (2 HP, scharfe Geschosse) und **Keks-Wächter** (3 HP, langsam und robust). Alle verursachen seitlich 1 HP Schaden und können gestampft oder mit Fähigkeiten besiegt werden. Ihre Geschosse lösen keine Cola-Reaktion aus.
+
 Aktive Powers sind an schwebenden Grafiken über der Figur sichtbar: **Chili bei Wasabi**, **Marshmallow bei der Gleit-Power**. Bei zwei aktiven Powers schweben beide nebeneinander; nach Ablauf verschwinden sie.
 
 Ab Welt 4 erscheinen außerdem **Tacos** mit 2 HP, seitlichem Kontaktschaden und grünen Füllungs-Geschossen. Die eigene lokale Zeichnung folgt der bereitgestellten Taco-Vorlage (gelbe Schale, Salat/Tomaten, böse Augen, dünne braune Arme/Beine), ohne die wasserzeichenbehaftete Vorlage einzubinden.
@@ -100,7 +120,7 @@ Ab Welt 4 gibt es **Wackelpudding**. Seitliche Berührung hält die Figur fest; 
 
 Totarial hat 25 Stationen und enthält nun auch Übungen für Marshmallow-Gleiten, Wind, Käseregen, Abkürzung, geheimen Gully, Wackelpudding und umschaltbare Mond-Schwerkraft; dazu Erklärungen der neuen Bosse. Die letzte Tür führt weiterhin ins Hauptmenü.
 
-Die ersten drei Hauptlevel sind gegenüber der vorherigen Fassung nochmals um ein Viertel gekürzt; Totarial bleibt vollständig. Nach einem Boss geht es zur nächsten Welt bis Wolken-Bäckerei; **alle sieben Welten sind sofort über die Welt-Auswahl erreichbar**, auch mit den Tasten **1–7**. Sieben Karten in zwei Reihen zeigen die jeweiligen Bosse. Die Boss-Lebensleiste steht oben. Ab halber Lebensenergie beginnt Phase 2: Der Bär erzeugt Püree-Schockwellen; das Trio nutzt Zinken-Sturm, Löffel-Doppelschlag und Messer-Turbo. Bosse bewegen sich mehr und springen regelmäßig. Normale Boss-Angriffe verursachen weiterhin 2 HP Schaden. In Phase 2 lädt jeder Bosskampf **einmal** eine starke Attacke mit **10 HP Schaden** auf. Die rote Zielzone wird **1,5 Sekunden** vorher angezeigt. Rechtzeitig aus der Zone laufen oder beim Ausbruch darüber springen; beim Fischstäbchen aus dem markierten Kreis schwimmen. Das Trio teilt sich eine solche Attacke, statt dreimal 10 HP unvermeidbar auszuteilen.
+Die ersten drei Hauptlevel sind gegenüber der vorherigen Fassung nochmals um ein Viertel gekürzt; Totarial bleibt vollständig. Nach einem Boss geht es zur nächsten Welt bis Mitternachts-Buffet; **alle 17 Welten sind sofort über die Welt-Auswahl erreichbar**. Drei Auswahlseiten zeigen die jeweiligen Bosse; **1–7** wählt auf der aktuellen Seite. Die Boss-Lebensleiste steht oben. Ab halber Lebensenergie beginnt Phase 2: Der Bär erzeugt Püree-Schockwellen; das Trio nutzt Zinken-Sturm, Löffel-Doppelschlag und Messer-Turbo. Bosse bewegen sich mehr und springen regelmäßig. Normale Boss-Angriffe verursachen weiterhin 2 HP Schaden. In Phase 2 lädt jeder Bosskampf **einmal** eine starke Attacke mit **10 HP Schaden** auf. Die rote Zielzone wird **1,5 Sekunden** vorher angezeigt. Rechtzeitig aus der Zone laufen oder beim Ausbruch darüber springen; beim Fischstäbchen aus dem markierten Kreis schwimmen. Das Trio teilt sich eine solche Attacke, statt dreimal 10 HP unvermeidbar auszuteilen.
 
 Beim Draufspringen wird die relative Bewegung von Spieler und Gegner berücksichtigt: Auch springende Gegner können sicher gestampft werden. Ein erfolgreicher Stampfer stößt den Spieler nach oben und gibt kurz Kontaktschutz.
 

@@ -22,7 +22,7 @@ const context=vm.createContext({
  addEventListener:(event,fn)=>handlers.global[event]=fn,
  requestAnimationFrame(){},performance:{now:()=>1000},console
 });
-for(const path of ['scripts/viewport.js','scripts/audio.js','scripts/worlds.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/clouds.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
+for(const path of ['scripts/viewport.js','scripts/audio.js','scripts/worlds.js','scripts/expansion.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/clouds.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
 vm.runInContext(script,context);
 const run=code=>vm.runInContext(code,context);
 for(const name of run('Object.keys(art)')){
@@ -539,7 +539,7 @@ for(const world of [3,4,5,7]){
  run('for(let i=0;i<89;i++)updateBossSpecial();var special=objects.find(o=>o.type==="bossHeavyWave");player.x=special.x+special.w/2-player.w/2;player.y=ground-player.h;player.hp=20;player.inv=0;updateBossProjectile(special)');assert.equal(run('player.hp'),10,'The marked special deals 10 HP in World '+world);
  run('player.inv=100000;for(let i=0;i<300;i++)updateBossFight(player.y+player.h)');assert.equal(run('boss.heavyCount'),1,'The powerful special is used only once per fight');
  run('boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert.equal(run('screen'),'victory','The new boss can be defeated');
- assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),world===7,'Only the final world disables further progression');
+ assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),world===17,'Only the final world disables further progression');
 }
 run('selectedLevel=4;reset();startBoss();objects=[];fireExplosivePopcorn(boss);var kernel=objects[0];kernel.x=player.x;kernel.y=player.y;kernel.fuse=1;player.hp=20;player.inv=0;updateBossProjectile(kernel);var blast=objects.find(o=>o.type==="popcornBlast");drawBossProjectile(blast);updateBossProjectile(blast)');assert(run('kernel.exploded&&kernel.life===0&&player.hp===18'),'Explosive popcorn creates a real 2-HP blast');
 run('player.hp=20;player.inv=0;player.x=blast.cx+blast.radius+20;updateBossProjectile({...blast,life:14})');assert.equal(run('player.hp'),20,'Moving beyond the blast radius avoids popcorn damage');
@@ -648,7 +648,7 @@ run('reset();draw()');assert(run('level===7&&levelWidth===12500&&enemies.length=
 assert(run('cliffs.every(g=>platforms.some(p=>p.cloudBun&&p.x>g.x&&p.x+p.w<g.x+g.w))'),'Every cloud gap has a reachable stable intermediate bun');
 run('screen="levelselect";draw();var cloudCard=menuButtons.find(b=>b.id==="level7")');handlers.canvas.pointerdown({pointerId:702,clientX:run('cloudCard.x+cloudCard.w/2'),clientY:run('cloudCard.y+cloudCard.h/2'),preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===7'),'Touch can select the seventh cloud-world card');
 run('selectedLevel=6;reset();startBoss();boss.hp=0;for(let i=0;i<76;i++)update();victoryAction("next")');assert(run('level===7&&isCloudWorld()'),'Underwater victory really starts Cloud Bakery');
-run('startBoss();boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert(run('screen==="victory"&&victoryButtons.find(b=>b.id==="next").disabled'),'Only the seventh world is now the final world');
+run('startBoss();boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert(run('screen==="victory"&&!victoryButtons.find(b=>b.id==="next").disabled'),'Cloud world now continues into the ten new worlds');
 run('selectedLevel=7;reset();enemies=[];objects=[];obstacles.length=0;platforms.length=0;cliffs.length=0;terraces.length=0;var cookie={x:500,y:405,cloudHomeY:405,w:100,h:20,cloudCookie:true,broken:0,crumbleFrames:0};platforms.push(cookie);player.x=510;player.y=405-player.h;player.onGround=true;player.vy=0;for(let i=0;i<44;i++)updateCloudPlatforms()');assert(run('cookie.broken===0&&cookie.crumbleFrames===44'),'Cookie warns before collapsing');run('updateCloudPlatforms();update();draw()');assert(run('cookie.broken>0&&cookie.y>WORLD_BOTTOM&&!player.onGround&&player.vy>0'),'Crumbling cookie actually stops supporting the player');run('for(let i=0;i<240;i++)updateCloudPlatforms()');assert(run('cookie.broken===0&&cookie.y===405'),'Cookie platforms regenerate after four seconds');
 run('selectedLevel=7;reset();enterSewer({exitX:2500});draw()');assert(run('undergroundTrip.theme==="cloud"&&obstacles.some(o=>o.type==="waffleStack")&&obstacles.some(o=>o.type==="kitchenCan")'),'Cloud world has a working bakery-themed sewer');run('exitSewer();draw()');assert(run('isCloudWorld()&&platforms.some(p=>p.cloudCookie)'),'Sewer exit restores cloud-platform state');
 run('selectedLevel=3;reset();startBoss();player.hp=20;player.inv=0;updateBossProjectile({type:"stormBolt",x:player.x,y:player.y,w:20,h:28,vx:0,vy:0,life:20,damage:2})');assert.equal(run('player.hp'),18,'Croissant lightning deals two HP, not ten');
@@ -693,4 +693,40 @@ const beforeResize=run('JSON.stringify([player.x,player.y,player.hp,player.inven
 canvas.getBoundingClientRect=()=>({left:0,top:0,width:768,height:1024});run('draw()');
 assert.equal(run('JSON.stringify([player.x,player.y,player.hp,player.inventory])'),beforeResize,'Rotating the screen does not teleport or reset the player');
 canvas.getBoundingClientRect=viewportBounds;context.devicePixelRatio=1;run('resizeGameCanvas()');
-console.log('PASS: proportional full-window rendering with expanded camera, retina resolution, unchanged physics and working menu/touch input at 16:10, 16:9, ultrawide and iPad landscape/portrait; seven worlds and all existing mechanics.');
+// Ten complete new worlds, not just extra menu cards.
+assert.equal(run('Object.keys(LEVEL_SETTINGS).length'),18,'Seventeen worlds plus Totarial');
+assert.equal(run('Object.keys(EXTRA_ENEMIES).length'),5,'Exactly five new enemy identities');
+assert.equal(run('Object.keys(art).length'),64,'All fifteen new original sprites are registered');
+run('screen="levelselect";selectedLevel=1;menuAction("pageNext");draw()');assert(run('worldMenuPage()===1&&menuButtons.some(b=>b.id==="level14")'),'Page two contains worlds 8–14');
+handlers.global.keydown({key:'3',repeat:false,preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===10'),'Number keys select within the current page');
+run('screen="levelselect";selectedLevel=15;draw()');assert(run('worldMenuPage()===2&&menuButtons.some(b=>b.id==="level17")&&menuButtons.find(b=>b.id==="pageNext").disabled'),'Last page includes the final three worlds');
+const expansionBosses=new Set(),expansionPatterns=new Set();
+for(let n=8;n<=17;n++){
+ run(`screen='levelselect';menuAction('level${n}');reset();player.inv=100000;draw()`);
+ assert.equal(run('level'),n,'Multi-digit world selection is exact');
+ assert(run('levelWidth===LEVEL_SETTINGS[level].width&&objects.some(o=>o.type==="key")&&objects.some(o=>o.type==="manhole")&&secretPassages.length>0'),'New worlds have full terrain, keys, sewers and secrets');
+ assert(run('Object.keys(EXTRA_ENEMIES).every(t=>enemies.some(e=>e.type===t&&e.hp===EXTRA_ENEMIES[t].hp&&e.w===EXTRA_ENEMIES[t].w))'),'All five new enemy types are real actors');
+ assert.equal(run('lavaPits.length>0'),n===16,'Only the new volcano has lava');
+ run('var extraMapWidth=levelWidth;enterSewer({exitX:2500});for(let i=0;i<5;i++){update();draw()}');
+ assert(run('undergroundTrip.theme==="extra"&&enemies.some(e=>EXTRA_ENEMIES[e.type])'),'New-world sewers include the new enemies');
+ run('exitSewer();draw()');assert.equal(run('levelWidth'),run('extraMapWidth'),'Sewer return restores the new world');
+ run('startBoss();player.inv=100000;var extraBossX=boss.x;for(let i=0;i<180;i++){update();draw()}');
+ expansionBosses.add(run('boss.art'));expansionPatterns.add(run('boss.pattern'));
+ assert(run('boss.extra&&boss.name===extraWorld().boss&&boss.hp===boss.max&&boss.x!==extraBossX'),'Each world has its own living, moving boss');
+ run('boss.attack=0;updateExtraBoss(boss)');assert(run('objects.some(o=>o.type==="banquetShot"||o.type==="bossWave")'),'Every new boss launches damaging attacks');
+ run('boss.hp=boss.max/2;update();var extraHeavyTarget=boss.heavyTarget;for(let i=0;i<89;i++){update();draw()}');
+ assert(run('boss.heavyCount===1&&objects.some(o=>o.type==="bossHeavyWave"&&o.damage===10)&&boss.heavyTarget===extraHeavyTarget'),'Every new boss has one 90-frame telegraphed ten-HP special');
+ run('for(let i=0;i<100;i++)update()');assert.equal(run('boss.heavyCount'),1,'No repeated heavy specials');
+ run('player.hp=20;player.inv=0;updateBossProjectile({type:"banquetShot",x:player.x,y:player.y,w:18,h:18,vx:0,vy:0,gravity:0,life:10,damage:2})');assert.equal(run('player.hp'),18,'Ordinary new-boss attacks deal exactly two HP');
+ run('player.inv=100000;boss.hp=0;for(let i=0;i<76;i++)update();draw()');
+ assert(run('screen==="victory"'),'Every new boss can be defeated');assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),n===17,'Only world seventeen ends progression');
+}
+assert.equal(expansionBosses.size,10,'Ten different original boss drawings');assert.equal(expansionPatterns.size,10,'Ten different attack patterns');
+for(const type of run('Object.keys(EXTRA_ENEMIES)')){
+ run(`selectedLevel=8;reset();objects=[];enemies=[];obstacles.length=0;platforms.length=0;terraces.length=0;cliffs.length=0;lavaPits.length=0;player.x=500;player.inv=100000;var def=EXTRA_ENEMIES['${type}'];var foe={type:'${type}',x:250,y:ground-def.h,w:def.w,h:def.h,hp:def.hp,damage:1,vx:0,vy:0,shoot:0,hop:0,dead:0,slow:0,onGround:true};enemies=[foe];update();draw()`);
+ if(type==='radish')assert(run('foe.vy<0'),'Radish really hops');
+ if(type==='pretzel'||type==='pepper')assert(run('objects.some(o=>o.type==="mentos"&&o.extraEnemy===foe.type&&o.taco)&&foe.shoot>0'),'New shooters fire their own non-Cola-reactive projectiles');
+ run('player.x=foe.x;player.y=foe.y;player.hp=20;player.inv=0;update()');assert.equal(run('player.hp'),19,'New enemy contact deals one HP');
+ run('objects=[];foe.y=ground-foe.h;foe.vy=0;foe.hop=999;foe.shoot=999;player.x=foe.x;player.y=foe.y-player.h-3;player.vy=4;player.onGround=false;player.inv=0;var oldFoeHp=foe.hp;update()');assert(run('foe.hp===oldFoeHp-1&&player.vy<0'),'Every new enemy can be stomped with a safe bounce');
+}
+console.log('PASS: 17 complete worlds, 10 new moving bosses with distinct attacks and single warned ten-HP specials, 5 new damageable enemy types, paged menu/keyboard/touch navigation, expanded proportional camera and all existing mechanics.');

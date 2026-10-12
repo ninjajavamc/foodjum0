@@ -14,8 +14,10 @@ function worldJumpSpeed(){return (level===5||(isTutorial()&&player?.practiceMoon
 function worldSettings(){return LEVEL_SETTINGS[level]||LEVEL_SETTINGS[1]}
 function worldFloorColors(){
  if(undergroundTrip)return ['#8b9690','#455b59'];
+ if(extraWorld())return extraWorld().floor;
  return worldSettings().theme==='cloud'?['#eef7ff','#b1cdec']:worldSettings().theme==='water'?['#e2d5af','#b0bcae']:worldSettings().theme==='moon'?['#c7d0da','#8595a8']:worldSettings().theme==='frost'?['#edf9ff','#8ebbd8']:worldSettings().theme==='crystal'?['#efd195','#c8a369']:worldSettings().theme==='kitchen'?['#fffefd','#edf0f3']:['#bd956a','#795840'];
 }
+function worldHudColor(){return undergroundTrip||['crystal','moon','water'].includes(worldSettings().theme)||[10,16,17].includes(level)?'#fff0d6':'#23334c'}
 function worldName(id=level){return (LEVEL_SETTINGS[id]||LEVEL_SETTINGS[1]).name}
 function isTutorial(){return level===0}
 function showGameplayHints(){return isTutorial()}
