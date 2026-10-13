@@ -8,7 +8,7 @@ function placeStructure(item){
 }
 function updateCatapult(o){
  o.cooldown=Math.max(0,o.cooldown-1);o.animation=Math.max(0,o.animation-1);
- if(player.seatedCatapult===o||o.shots<=0||o.cooldown>0)return;
+ if(onlineCatapultOccupied(o)||o.shots<=0||o.cooldown>0)return;
  const originX=o.x+44,originY=o.y+8,target=enemies.find(e=>!e.dead&&Math.abs(e.x-originX)<330)||findBossTarget(originX,originY,330);
  if(!target)return;
  const dx=target.x+target.w/2-originX,dy=target.y+target.h/2-originY,t=Math.max(12,Math.abs(dx)/5.5),gravity=.22;

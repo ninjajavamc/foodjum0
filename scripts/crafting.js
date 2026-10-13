@@ -17,21 +17,23 @@ function inventoryStorage(category=player.inventoryCategory||'powers'){
  const building=category==='builds';return {category:building?'builds':'powers',list:building?player.buildInventory:player.inventory,indexKey:building?'buildInventoryIndex':'inventoryIndex',capacity:building?3:2,get index(){return player[this.indexKey]}};
 }
 function itemStorage(item){return inventoryStorage(BUILD_ITEMS.has(item)?'builds':'powers')}
-function selectInventorySlot(number){const storage=inventoryStorage(number<=2?'powers':'builds');player.inventoryCategory=storage.category;player[storage.indexKey]=number<=2?number-1:number-3}
+function selectInventorySlot(number){if(onlineSendAction('slot',number))return;const storage=inventoryStorage(number<=2?'powers':'builds');player.inventoryCategory=storage.category;player[storage.indexKey]=number<=2?number-1:number-3}
 function nearCraftStation(){return screen==='crafting'}
-function openWorkbench(){if(!['play','inventory','crafting'].includes(screen))return;screen='crafting';keys={};heldPointers.clear();playSound('menu')}
+function openWorkbench(){if(onlineGuestModal('crafting'))return;if(!['play','inventory','crafting'].includes(screen))return;screen='crafting';keys={};heldPointers.clear();playSound('menu')}
 function toggleInventory(){
+ if(onlineIsGuest()){onlineGuestModal(online.modal?'':'inventory');return}
  if(screen==='play'){screen='inventory';keys={};heldPointers.clear();playSound('menu')}
  else if(screen==='inventory'||screen==='crafting'){screen='play';playSound('menu')}
 }
 function dropItem(){
+ if(onlineSendAction('drop'))return;
  if(!['play','inventory','crafting'].includes(screen))return;
  const storage=inventoryStorage(),item=storage.list[storage.index];if(!item)return;
  storage.list.splice(storage.index,1);player[storage.indexKey]=Math.min(storage.index,Math.max(0,storage.list.length-1));
  objects.push({type:'looseItem',item,x:Math.max(0,Math.min(levelWidth-36,player.x+player.facing*65)),y:player.y+10,w:34,h:34,vx:player.facing*1.2,vy:-2,delay:45,life:Infinity});message='Item abgelegt: '+ITEM_NAMES[item];playSound('menu');
 }
 function collectWorldLoot(o){
- if(o.collected||screen!=='play'||!rect(player,o))return;
+ if(player.down||o.collected||screen!=='play'||!rect(player,o))return;
  if(o.type==='material'){
   player.bag[o.material]=(player.bag[o.material]||0)+(o.quantity||1);o.collected=true;o.life=0;message=MATERIALS[o.material].name+' gesammelt! I öffnet das Inventar.';playSound('pickup');
  }else if(o.type==='looseItem'&&!(o.delay>0)){
@@ -48,6 +50,7 @@ function updateLooseItem(o){
 }
 function canCraft(recipe){const storage=itemStorage(recipe.item);return itemAllowed(recipe.item)&&nearCraftStation()&&storage.list.length<storage.capacity&&Object.entries(recipe.ingredients).every(([material,count])=>player.bag[material]>=count)}
 function craftItem(){
+ if(onlineSendAction('craft',selectedRecipe))return;
  const recipe=RECIPES[selectedRecipe];
  if(!itemAllowed(recipe.item)){message='Auf dem Mond sind Sprungfedern gesperrt.';return}
  if(!nearCraftStation()){message='Öffne erst die Werkbank mit B oder dem Button.';return}
@@ -65,6 +68,7 @@ function inventoryKey(event){
  if(key==='arrowleft')selectedRecipe=(selectedRecipe+RECIPES.length-1)%RECIPES.length;if(key==='arrowright')selectedRecipe=(selectedRecipe+1)%RECIPES.length;
 }
 function inventoryAction(id){
+ if(onlineIsGuest()&&/^(powerTab|buildTab|slot[0-2])$/.test(id))onlineSendAction('inventory',id);
  if(id==='close')toggleInventory();else if(id==='openCraft')openWorkbench();else if(id==='drop')dropItem();else if(id==='craft')craftItem();else if(id==='powerTab')player.inventoryCategory='powers';else if(id==='buildTab')player.inventoryCategory='builds';else if(id.startsWith('slot'))player[inventoryStorage().indexKey]=Number(id.at(-1));else if(id.startsWith('recipe'))selectedRecipe=Number(id.at(-1));
 }
 function drawLoosePickup(o){

@@ -47,7 +47,7 @@ function placeLadder(){
 function updatePlacedLadders(){
  for(const ladder of objects.filter(o=>o.type==='ladder'&&o.support&&platforms.includes(o.support))){
   const change=ladder.support.y-ladder.y-ladder.h;ladder.x=ladder.support.x+ladder.supportOffset;ladder.y+=change;
-  if(player.climbing===ladder)player.y+=change;
+  for(const p of onlinePlayers())if(p.climbing===ladder)p.y+=change;
  }
 }
 function nearbyLadder(){

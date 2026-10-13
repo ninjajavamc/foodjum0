@@ -27,7 +27,7 @@ function updateCloudPlatforms(){
  for(const p of platforms){
   if(!p.cloudCookie)continue;
   if(p.broken>0){p.broken--;p.y=p.broken>0?WORLD_BOTTOM+300:p.moving?p.baseY+Math.sin(tick*.02+p.phase)*22:p.cloudHomeY;continue}
-  const standing=player.onGround&&Math.abs(player.y+player.h-p.y)<6&&player.x+player.w>p.x&&player.x<p.x+p.w;
+  const standing=onlinePlayers().some(actor=>!actor.down&&actor.onGround&&Math.abs(actor.y+actor.h-p.y)<6&&actor.x+actor.w>p.x&&actor.x<p.x+p.w);
   p.crumbleFrames=standing?(p.crumbleFrames||0)+1:0;
   if(p.crumbleFrames>=45){
    for(let i=0;i<8;i++)particles.push({type:'rockDebris',x:p.x+i*p.w/8,y:p.y,vx:(Math.random()-.5)*3,vy:-2,r:3,life:30,maxLife:30,color:'#c8995f'});

@@ -22,7 +22,7 @@ const context=vm.createContext({
  addEventListener:(event,fn)=>handlers.global[event]=fn,
  requestAnimationFrame(){},performance:{now:()=>1000},console
 });
-for(const path of ['scripts/viewport.js','scripts/audio.js','scripts/worlds.js','scripts/expansion.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/clouds.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
+for(const path of ['scripts/viewport.js','scripts/audio.js','scripts/worlds.js','scripts/expansion.js','scripts/world-art.js','scripts/kitchen-art.js','scripts/frost-art.js','scripts/moon-art.js','scripts/underwater.js','scripts/clouds.js','scripts/pudding.js','scripts/weather.js','scripts/game-features.js','scripts/companions.js','scripts/crafting.js','scripts/scenery.js','scripts/abilities.js','scripts/structures.js','scripts/traversal.js','scripts/sewers.js','scripts/menus.js','scripts/bosses.js','scripts/boss-moves.js','scripts/dessert-bosses.js','scripts/secrets.js','scripts/tutorial.js','scripts/player-motion.js','scripts/online.js'])vm.runInContext(fs.readFileSync(path,'utf8'),context);
 vm.runInContext(script,context);
 const run=code=>vm.runInContext(code,context);
 for(const name of run('Object.keys(art)')){
@@ -375,8 +375,8 @@ run('selectedBuddy=0;reset();objects=[];obstacles.length=0;platforms.length=0;la
 assert(run('player.hp===20&&enemies[0].hp===1&&player.vy<0&&player.inv>=15'),'Stomping a jumping enemy bounces safely and protects against a nearby second enemy');
 run('player.x=700;player.y=ground-player.h;player.vy=0;player.inv=0;enemies=[{type:\"gummy\",x:700,y:ground-42,w:42,h:42,hp:2,damage:1,shoot:1000,slow:0,dead:0,vy:0}];update()');assert.equal(run('player.hp'),19,'Ordinary side contact still hurts');
 for(let i=0;i<4;i++){run('selectedLevel=1;reset()');assert(run('levelWidth===9000&&enemies.length===12&&objects.filter(o=>o.type===\"lunchbox\").length<=4'),'Level 1 is a further quarter shorter and item boxes are rare')}
-run('screen=\"start\";draw()');assert(run('menuButtons.some(b=>b.id===\"levels\")&&menuButtons.find(b=>b.id===\"multiplayer\").disabled'),'Start screen offers levels and disabled upcoming multiplayer');
-handlers.canvas.pointerdown({pointerId:100,clientX:500,clientY:370,preventDefault(){}});assert.equal(run('screen'),'start','Multiplayer is not misleadingly playable');
+run('screen=\"start\";draw()');assert(run('menuButtons.some(b=>b.id===\"levels\")&&!menuButtons.find(b=>b.id===\"multiplayer\").disabled'),'Start screen offers levels and online room-code multiplayer');
+handlers.canvas.pointerdown({pointerId:100,clientX:500,clientY:370,preventDefault(){}});assert.equal(run('screen'),'online','Multiplayer opens the online lobby instead of pretending to be local play');run('onlineLeave();draw()');
 handlers.canvas.pointerdown({pointerId:101,clientX:500,clientY:275,preventDefault(){}});assert.equal(run('screen'),'levelselect','Level selection comes before characters');
 run('draw();var secondWorldCard=menuButtons.find(b=>b.id==="level2")');handlers.canvas.pointerdown({pointerId:102,clientX:run('secondWorldCard.x+secondWorldCard.w/2'),clientY:run('secondWorldCard.y+secondWorldCard.h/2'),preventDefault(){}});assert(run('screen===\"choose\"&&selectedLevel===2'),'Choosing Level 2 leads to character selection');
 handlers.global.keydown({key:'Enter',repeat:false,preventDefault(){}});assert.equal(run('screen'),'buddy','Character selection is followed by companion selection');

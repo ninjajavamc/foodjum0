@@ -1,7 +1,7 @@
 // Tiny synthesized effects. Audio starts only after a user gesture; works offline.
 let audioContext=null,audioMaster=null,soundEnabled=true;
 const MUSIC_SOURCES={menu:'assets/audio/menu.mp3',overworld:'assets/audio/overworld.mp3',boss:'assets/audio/boss.mp3',sewer:'assets/audio/sewer.mp3'};
-const MENU_MUSIC_SCREENS=new Set(['start','levelselect','choose','buddy']);
+const MENU_MUSIC_SCREENS=new Set(['start','levelselect','choose','buddy','online']);
 let backgroundMusic=null,musicScene=null,musicSession=null,musicUnlocked=false,musicFocused=true,musicPending=false,musicBlocked=false,musicRequest=0;
 const unavailableMusic=new Set();
 function syncMusic(){

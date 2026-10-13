@@ -24,7 +24,7 @@ function drawMandarinBabies(){
  for(const b of mandarinBabies){x.save();x.globalAlpha=Math.min(1,b.life/30);if(isSwimming())drawSwimmingSprite('mandarin-piece',b.x-3,b.y-6,28,37,tick*.13+b.phase);else drawWalkingSprite('mandarin-piece',b.x-3,b.y-6+Math.sin(tick*.15+b.phase)*2,28,37,tick*.13+b.phase,b.walking);x.restore()}
 }
 function throwBananaBoomerang(){
- objects.push({type:'bananaBoomerang',x:player.x+(player.facing>0?player.w:-36),y:player.y+12,w:36,h:24,vx:player.facing*6.2,originY:player.y+12,age:0,life:110,hitTargets:new Set()});
+ objects.push({type:'bananaBoomerang',onlineOwner:online.context?'guest':'host',x:player.x+(player.facing>0?player.w:-36),y:player.y+12,w:36,h:24,vx:player.facing*6.2,originY:player.y+12,age:0,life:110,hitTargets:new Set()});
  message='Bananenschale + Bananen-Bumerang!';
 }
 function updateBananaBoomerang(o){

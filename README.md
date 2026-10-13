@@ -5,12 +5,25 @@
 ## Online spielen (iPad und PC)
 **Spiel-Link:** https://ninjajavamc.github.io/foodjum0/
 
-Auf dem iPad in **Safari**, am PC z. B. in **Chrome** öffnen. Auf dem iPad am besten im Querformat mit den Bildschirmtasten spielen; am PC funktionieren Tastatur und Maus. Kein Download und keine Anmeldung nötig. Der erste Aufruf lädt das Spiel und die lokalen Grafiken/Musik über das Internet. Das ist Einzelspieler – jeder spielt für sich.
+Auf dem iPad in **Safari**, am PC z. B. in **Chrome** öffnen. Auf dem iPad am besten im Querformat mit den Bildschirmtasten spielen; am PC funktionieren Tastatur und Maus. Kein Download und keine Anmeldung nötig. Der erste Aufruf lädt das Spiel und die lokalen Grafiken/Musik über das Internet. Es gibt Einzelspieler und **Online-Koop für zwei Geräte mit Raumcode**.
 
 Veröffentlichung: GitHub Pages, Branch `main`, Ordner `/ (root)`. `.nojekyll` sorgt für direkte Bereitstellung der statischen Dateien. Nach einem Push kann die Aktualisierung einige Minuten dauern.
 
 ## Start
-Startbildschirm → Welt-Auswahl → Charakter → Begleiter → Spiel. **Totarial** und alle **17 Welten** von **Wiesenwald** bis **Mitternachts-Buffet** können direkt ausgewählt werden. Drei Seiten zeigen jeweils bis zu sieben Karten; **Weiter / Zurück** wechselt die Seite, **1–7** wählt eine Karte der aktuellen Seite. Mit **← / → und Enter** kann man durch alle Welten gehen. **Multiplayer – kommt noch** ist sichtbar, aber noch deaktiviert. Bei „Spiel vorbei“ gibt es **Nochmal spielen** und **Hauptmenü**.
+Startbildschirm → Welt-Auswahl → Charakter → Begleiter → Spiel. **Totarial** und alle **17 Welten** von **Wiesenwald** bis **Mitternachts-Buffet** können direkt ausgewählt werden. Drei Seiten zeigen jeweils bis zu sieben Karten; **Weiter / Zurück** wechselt die Seite, **1–7** wählt eine Karte der aktuellen Seite. Mit **← / → und Enter** kann man durch alle Welten gehen. **ONLINE MULTIPLAYER · Raumcode** startet den Zwei-Spieler-Modus. Bei „Spiel vorbei“ gibt es **Nochmal spielen** und **Hauptmenü**.
+
+## Online mit einem Freund
+1. Beide öffnen den Spiel-Link und wählen **ONLINE MULTIPLAYER · Raumcode**.
+2. Jeder wählt seine eigene Figur und seinen Begleiter. Der Gastgeber wählt außerdem eine der 17 Welten.
+3. Einer klickt **Raum erstellen** und schickt den achtstelligen Code an den Freund.
+4. Der Freund trägt den Code ein und klickt **Beitreten**.
+5. Sobald beide verbunden sind, klickt der Gastgeber **Gemeinsam starten**.
+
+Beide haben ihre eigene Kamera, Steuerung, **20 HP**, Powers, Bausachen und Materialien. Jeder kann seine eigenen Fähigkeiten benutzen und seinen Begleiter mitbringen. Gegner, Bosskämpfe, Bauobjekte und die Landschaft sind gemeinsam; Schlüssel und Punkte werden geteilt. Gullys, Bossräume und der nächste Level nehmen beide mit. Bei 0 HP bleibt die Figur liegen: Der Freund kann in der Nähe mit **W / NUTZEN** helfen (Wiederbelebung mit 10 HP). Erst wenn beide liegen, ist die Runde verloren. Inventar/Werkbank und Pause halten die gemeinsame Welt an. Kein Friendly Fire.
+
+**Internet ist für Online nötig.** Beide müssen den Spiel-Tab offen lassen; der Gastgeber berechnet die Welt, das zweite Gerät übermittelt nur Steuerung und Aktionen. Eine unterbrochene Verbindung stoppt die Online-Runde und zeigt eine Meldung statt eines scheinbar weiterlaufenden Freundes. Zum erneuten Spielen einen neuen Raum erstellen. Browser sollten aktuell sein; iPad: Safari. Manche Firewalls, Mobilfunk- oder Schulnetze können WebRTC blockieren; gegebenenfalls anderes WLAN versuchen.
+
+Verbindung: lokale, fest versionierte **PeerJS 1.5.5**-Bibliothek, öffentlicher PeerJS-Vermittlungsdienst und WebRTC mit STUN/TURN. Kein eigener Server, Konto, Kamera oder Mikrofon erforderlich. Der Dienst ist extern und seine Verfügbarkeit ist nicht garantiert. IP-Adressen und Verbindungskennungen werden für die Vermittlung/Weiterleitung verwendet; Spieldaten laufen über einen verschlüsselten WebRTC-Datenkanal. Raumcodes nur mit dem Freund teilen. Einzelspieler bleibt vollständig offline spielbar; die Netzwerkbibliothek wird nur beim Erstellen/Beitreten eines Online-Raums geladen.
 
 ## Steuerung
 - **T / 0 im Hauptmenü oder der Welt-Auswahl:** Totarial auswählen
@@ -136,5 +149,6 @@ Alle vier MP3s liegen lokal bei und laufen in Schleife, niemals gleichzeitig. Di
 
 ## Entwicklung
 - Artwork neu erzeugen: `node scripts/build-art.cjs`
-- Tests: `node tests/game.test.cjs`
+- Einzelspieler/Regression: `node tests/game.test.cjs`
+- Zwei-Geräte-Protokoll und Koop-Physik: `node tests/online.test.cjs`
 - Bildquellen und Lizenzen: `credits.html`

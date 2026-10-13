@@ -20,6 +20,9 @@ function nearbyManhole(){
  return objects.find(o=>o.type===(undergroundTrip?'sewerExit':'manhole')&&Math.abs(player.x+player.w/2-o.x-o.w/2)<80&&Math.abs(player.y+player.h-o.y)<(undergroundTrip?35:95));
 }
 function interactWorld(){
+ if(onlineSendAction('interact'))return;
+ if(onlineReviveNearby())return;
+ if(player.down)return;
  if(screen!=='play'||player.trappedIn)return;
  if(player.seatedCatapult){interactCatapult();return}
  if(nearBossDoor()){openBossDoor();return}
@@ -48,7 +51,7 @@ function enterSewer(hatch){
  if(level>=5)enemies.push({type:'maki',x:1470,y:ground-58,w:48,h:58,hp:2,damage:1,vx:0,vy:0,shoot:1000,dead:0,slow:0});
  if(reward){const chest={type:'sewerTreasure',x:1950,y:ground-52,w:70,h:52,reward};objects.push(chest);if(reward.collected)addSewerRewardPowers(chest)}
  if(isSwimming())for(const e of enemies){e.y-=100;e.onGround=false}
- resetTraversalPosition(150,ground);if(isSwimming()){player.y-=90;player.onGround=false}resetCompanion();keys={};heldPointers.clear();playSound('menu');message='KANAL · Schimmelkäse & Donuts · Leiter am Ende';
+ resetTraversalPosition(150,ground);if(isSwimming()){player.y-=90;player.onGround=false}resetCompanion();keys={};heldPointers.clear();playSound('menu');message='KANAL · Schimmelkäse & Donuts · Leiter am Ende';onlineTransition();
 }
 function hiddenSewerReward(hatch){
  if(hatch.secretReward)return hatch.secretReward;
@@ -89,7 +92,7 @@ function exitSewer(){
  const trip=undergroundTrip,saved=trip.saved;undergroundTrip=null;
  for(const name of ['lavaPits','cliffs','obstacles','platforms','trees','hooks','terraces']){const list={lavaPits,cliffs,obstacles,platforms,trees,hooks,terraces}[name];list.splice(0,list.length,...saved[name])}
  levelWidth=saved.levelWidth;doorX=saved.doorX;objects=saved.objects;enemies=saved.enemies;particles=saved.particles;defeated=saved.defeated;secretPassages=saved.secretPassages;mandarinBabies=[];
- resetTraversalPosition(trip.exitX+14,floorAtX(trip.exitX+35));camera=cameraTargetX(player.x);cameraY=floorAtX(player.x+player.w/2)-ground;resetCompanion();keys={};heldPointers.clear();playSound('menu');message='Wieder draußen! Dieser Gully liegt weiter vorne im Level.';
+ resetTraversalPosition(trip.exitX+14,floorAtX(trip.exitX+35));camera=cameraTargetX(player.x);cameraY=floorAtX(player.x+player.w/2)-ground;resetCompanion();keys={};heldPointers.clear();playSound('menu');message='Wieder draußen! Dieser Gully liegt weiter vorne im Level.';onlineTransition();
 }
 function drawManhole(o){
  x.save();x.translate(o.x,o.y);x.fillStyle='#3d5158';x.strokeStyle='#a0b7b7';x.lineWidth=3;x.beginPath();x.ellipse(o.w/2,6,o.w/2,9,0,0,Math.PI*2);x.fill();x.stroke();x.strokeStyle='#718c93';x.lineWidth=2;

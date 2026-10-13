@@ -2,7 +2,7 @@ let selectedLevel=1,menuButtons=[];
 function menuAction(id){
  keys={};heldPointers.clear();
  if(id==='levels'){screen='levelselect';playSound('menu')}
- else if(id==='multiplayer'){message='Multiplayer kommt noch.'}
+ else if(id==='multiplayer')onlineMenu();
  else if(id==='pagePrev'||id==='pageNext'){
   const pages=Math.ceil((Object.keys(LEVEL_SETTINGS).length-1)/7),page=Math.max(0,Math.min(pages-1,worldMenuPage()+(id==='pageNext'?1:-1)));if(page===worldMenuPage())return;selectedLevel=page*7+1;playSound('menu');
  }
@@ -26,8 +26,8 @@ function drawMenuBack(){
 }
 function drawStart(){
  x.save();x.fillStyle='rgba(25,43,53,.8)';fillViewport();x.textAlign='center';x.fillStyle='#ffebad';x.font='900 61px system-ui';x.fillText('FOOD JUM0',W/2,145);x.fillStyle='#e0eee1';x.font='21px system-ui';x.fillText('Dein Food-Platformer',W/2,192);
- menuButtons=[{id:'levels',x:270,y:246,w:460,h:68,label:'WELT-AUSWAHL'},{id:'multiplayer',x:270,y:336,w:460,h:68,label:'MULTIPLAYER – kommt noch',disabled:true}];menuButtons.push({id:'tutorial',x:270,y:424,w:460,h:52,label:'TOTARIAL – zuerst üben (T)'});menuButtons.forEach(drawMenuButton);
- sprite('spaghetti',75,300,110,150);sprite('banane',812,300,110,150);x.fillStyle='#e3eede';x.font='17px system-ui';x.fillText(message==='Multiplayer kommt noch.'?message:'Level auswählen oder Enter drücken',W/2,525);x.restore();
+ menuButtons=[{id:'levels',x:270,y:246,w:460,h:68,label:'WELT-AUSWAHL'},{id:'multiplayer',x:270,y:336,w:460,h:68,label:'ONLINE MULTIPLAYER · Raumcode'}];menuButtons.push({id:'tutorial',x:270,y:424,w:460,h:52,label:'TOTARIAL – zuerst üben (T)'});menuButtons.forEach(drawMenuButton);
+ sprite('spaghetti',75,300,110,150);sprite('banane',812,300,110,150);x.fillStyle='#e3eede';x.font='17px system-ui';x.fillText('Allein oder online mit deinem Freund spielen',W/2,525);x.restore();
 }
 function worldMenuPage(){return Math.floor((Math.max(1,selectedLevel)-1)/7)}
 function drawLevelSelect(){

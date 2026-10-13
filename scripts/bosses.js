@@ -12,7 +12,7 @@ function beginBossFight(){
  }else boss={art:'boss',x:720,y:ground-116,w:130,h:116,hp:19,max:19,vx:-1.15,vy:0,jumpTimer:60,attack:180,flash:0,damage:2,dead:false,phase:1,isBoss:true};
  enemies=[];objects=[];
  if(isSwimming())for(const px of [270,875])objects.push({type:'looseItem',item:'mushroom',x:px,y:ground-34,w:34,h:34,life:Infinity,delay:0});
- defeated=[];mandarinBabies=[];door=false;camera=0;cameraY=0;player.x=150;player.y=ground-player.h-(isSwimming()?90:0);player.onGround=false;player.vx=0;player.vy=0;player.swing=null;player.climbing=null;player.seatedCatapult=null;player.launchFrames=0;player.inv=110;resetCompanion(true);playSound('boss');message='BOSS: '+worldBossName(level)+'!';
+ defeated=[];mandarinBabies=[];door=false;camera=0;cameraY=0;player.x=150;player.y=ground-player.h-(isSwimming()?90:0);player.onGround=false;player.vx=0;player.vy=0;player.swing=null;player.climbing=null;player.seatedCatapult=null;player.launchFrames=0;player.inv=110;resetCompanion(true);playSound('boss');message='BOSS: '+worldBossName(level)+'!';onlineTransition();
 }
 function makeBossWave(px,direction){objects.push({type:'bossWave',x:px,y:ground-25,w:26,h:25,vx:direction*4.2,life:160})}
 function updateBossProjectile(o){
@@ -21,7 +21,7 @@ function updateBossProjectile(o){
  if(['cutleryShot','sugarPuff','pickleShot'].includes(o.type)){o.vy+=o.type==='sugarPuff'?.065:o.type==='pickleShot'?.1*worldGravity()/.58:.08;o.y+=o.vy}
  if(o.type==='explosivePopcorn'){o.vy+=.18;o.y+=o.vy;o.fuse--;if(rect(player,o)||o.y+o.h>=ground||o.fuse<=0){explodePopcorn(o);return}}
  o.life--;
- const touches=o.type==='bossHeavyWave'&&o.flavor==='boss-fishstick'?Math.hypot(Math.max(player.x,Math.min(o.x+125,player.x+player.w))-o.x-125,Math.max(player.y,Math.min(o.y+125,player.y+player.h))-o.y-125)<=125:o.type==='popcornBlast'?Math.hypot(Math.max(player.x,Math.min(o.cx,player.x+player.w))-o.cx,Math.max(player.y,Math.min(o.cy,player.y+player.h))-o.cy)<=o.radius:rect(player,o);
+ const touches=onlineProjectileTouches(o,player);
  if(touches&&o.type!=='explosivePopcorn'){hitPlayer(o.damage||2,0,110);o.life=0}
  if(o.x+o.w<0||o.x>W||(['cutleryShot','sugarPuff','pickleShot','crumbShot','stormBolt'].includes(o.type)&&o.y+o.h>=ground))o.life=0;
 }
@@ -33,7 +33,7 @@ function updateBossFight(previousBottom){
   boss.hp=boss.members.reduce((sum,b)=>sum+Math.max(0,b.hp),0);
  }
  if(boss.hp<=0){
-  boss.dead=true;boss.deathTimer=75;player.score+=1000;
+  boss.dead=true;boss.deathTimer=75;addScore(1000);
   if(!boss.members)defeated.push({art:boss.art,x:boss.x+boss.w/2,y:boss.y+boss.h/2,vx:0,vy:-3,angle:0,life:75,maxLife:75,size:boss.art==='boss-fishstick'?250:145});message='Boss besiegt!';return;
  }
  if(boss.phase===1&&boss.hp<=boss.max/2){boss.phase=2;playSound('boss');shake=12;message='HALBE HP! Neue Boss-Attacke!';for(const b of bossTargets())b.attack=35}

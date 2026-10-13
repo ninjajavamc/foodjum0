@@ -44,6 +44,8 @@ function safeColaX(preferred,width=64){
 }
 function nearBossDoor(){return screen==='play'&&!boss&&!undergroundTrip&&Math.abs(player.x+player.w/2-(doorX+50))<100&&player.y+player.h>ground-145}
 function openBossDoor(){
+ if(onlineSendAction('door'))return;
+ if(online.active&&onlinePlayers().some(p=>p.down)){message='Belebt zuerst euren Freund mit W wieder.';return}
  if(!nearBossDoor())return;
  if(!player.hasKey){message='Finde zuerst den Schlüssel im Level!';return}
  if(isTutorial()){screen='start';keys={};heldPointers.clear();message='Totarial abgeschlossen!';playSound('menu');return}
@@ -65,13 +67,14 @@ function grapple(){
  else{player.cooldown=12;message='Schwung 1/2 · E: nächster Haken · Springen: loslassen'}
 }
 function collectLunchbox(box){
- if(box.used||player.inventory.length>=2||screen!=='play')return;
+ if(player.down||box.used||player.inventory.length>=2||screen!=='play')return;
  const available=ITEM_TYPES.filter(itemAllowed);box.used=true;box.item=available[Math.floor(Math.random()*available.length)];player.inventory.push(box.item);playSound('pickup');
  particles.push({type:'pickup',art:box.item,x:box.x+box.w/2,y:box.y-12,vx:0,vy:-.6,age:0,life:60,maxLife:60});
  message=ITEM_NAMES[box.item]+' gefunden! F oder ITEM drücken.';
 }
 function useItem(){
- if(screen!=='play')return;
+ if(onlineSendAction('item'))return;
+ if(screen!=='play'||player.down)return;
  if(player.seatedCatapult){message='W zum Abschießen oder Space zum Aussteigen.';return}
  const storage=inventoryStorage(),item=storage.list[storage.index];
  if(item){
@@ -202,6 +205,8 @@ function drawExtraTerrain(){
  x.restore();
 }
 function victoryAction(action){
+ if(onlineSendAction('victory',action))return;
+ if(online.active&&action==='menu'){onlineLeave();return}
  if(action==='next'){
   if(isTutorial()){
    if(tutorialBossRound===1){tutorialBossRound=2;screen='play';player.hp=MAX_HP;beginBossFight();return}

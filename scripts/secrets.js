@@ -10,6 +10,13 @@ function generateSecretPassages(){
   for(const list of [obstacles,platforms])for(let i=list.length-1;i>=0;i--)if(list[i].x+list[i].w>left-100&&list[i].x<left+80)list.splice(i,1);
   for(const bottle of objects.filter(o=>o.type==='cola'&&o.x+o.w>left-100&&o.x<left+80)){const old=bottle.x;bottle.x=-1000;const safe=safeColaX(left+width+180,bottle.w);bottle.x=safe??old;bottle.y=floorAtX(bottle.x+bottle.w/2)-bottle.h}
  }
+ // Random terrace layouts must not accidentally remove every secret from a world.
+ if(!secretPassages.length)for(let left=1850;left<levelWidth-800;left+=30){
+  const width=260;if(floorAtX(left)!==floorAtX(left+width)||[...lavaPits,...cliffs].some(g=>left<g.x+g.w&&left+width>g.x)||objects.some(o=>['cola','key'].includes(o.type)&&left<o.x+o.w+5&&left+width>o.x-5))continue;
+  const base=floorAtX(left),wall={type:'secretWall',x:left,y:base-85,w:62,h:85,life:Infinity};objects.push(wall);secretPassages.push({x:left,w:width,base,open:false,wall,kind:['loot','shortcut','gully'][rotation]});
+  for(const list of [obstacles,platforms])for(let i=list.length-1;i>=0;i--)if(list[i].x+list[i].w>left-100&&list[i].x<left+80)list.splice(i,1);
+  break;
+ }
 }
 function secretDestination(room){
  const wall=objects.filter(o=>o.type==='greatWall'&&o.x>room.x).sort((a,b)=>a.x-b.x)[0],key=objects.find(o=>o.type==='key'&&!o.collected&&o.x>room.x+room.w);
