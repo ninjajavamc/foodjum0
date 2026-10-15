@@ -1,4 +1,4 @@
-// Ten original food worlds. Physics and the shared, avoidable half-health special stay unchanged.
+// Original food worlds, including the Kaiserschmarrn-Alm. Physics and the shared, avoidable half-health special stay unchanged.
 const EXTRA_WORLDS={
  8:{name:'Tomaten-Gewächshaus',boss:'König Ketchup',art:'boss-tomato',pattern:'fan',sky:['#9ed9d1','#edf2af'],floor:['#92b85e','#577c42'],accent:'#dc665a',prop:'plant'},
  9:{name:'Käse-Festung',boss:'Käse-Ritter',art:'boss-cheese',pattern:'dash',sky:['#83a4c5','#eee0a8'],floor:['#eed276','#bd934e'],accent:'#d2ae60',prop:'castle'},
@@ -9,7 +9,8 @@ const EXTRA_WORLDS={
  14:{name:'Schoko-Fabrik',boss:'Schoko-Golem',art:'boss-chocolate',pattern:'bomb',sky:['#ab929d','#e4bea4'],floor:['#ac7b58','#684738'],accent:'#b18469',prop:'factory'},
  15:{name:'Frühstücksberge',boss:'Pfannkuchen-Turm',art:'boss-pancake',pattern:'bounce',sky:['#a8cfe1','#fff0b9'],floor:['#ecc58f','#b88f58'],accent:'#e2b066',prop:'mountain'},
  16:{name:'Gewürz-Vulkan',boss:'Chili-Drache',art:'boss-chili-dragon',pattern:'fire',sky:['#653f63','#e79565'],floor:['#ba7660','#684449'],accent:'#eb7155',prop:'volcano',flying:true},
- 17:{name:'Mitternachts-Buffet',boss:'Donut-Herrscher',art:'boss-donut',pattern:'ring',sky:['#252d57','#766696'],floor:['#9b8aad','#5a5278'],accent:'#bb87ca',prop:'buffet',flying:true}
+ 17:{name:'Mitternachts-Buffet',boss:'Donut-Herrscher',art:'boss-donut',pattern:'ring',sky:['#252d57','#766696'],floor:['#9b8aad','#5a5278'],accent:'#bb87ca',prop:'buffet',flying:true},
+ 18:{name:'Kaiserschmarrn-Alm',boss:'Apfelmus-Kaiser',art:'boss-applesauce',pattern:'applesauce',sky:['#b0d8e8','#fff1d4'],floor:['#edc482','#a66d3b'],accent:'#dca45c',prop:'schmarrn'}
 };
 const EXTRA_ENEMIES={
  radish:{name:'Radieschen-Hüpfer',w:44,h:48,hp:2,speed:.6},
@@ -29,6 +30,7 @@ function decorateExtraWorld(){
  if(!extraWorld()||boss||undergroundTrip)return;
  if(level!==16){cliffs.push(...lavaPits);lavaPits.length=0}
  for(const gap of [...cliffs,...lavaPits])platforms.push({x:gap.x+gap.w/2-32,y:gap.y-62,w:64,h:18});
+ if(level===18)for(const p of platforms)p.schmarrn=true;
  for(const e of enemies)if(EXTRA_ENEMIES[e.type])Object.assign(e,{w:EXTRA_ENEMIES[e.type].w,h:EXTRA_ENEMIES[e.type].h,hp:EXTRA_ENEMIES[e.type].hp,y:floorAtX(e.x)-EXTRA_ENEMIES[e.type].h,damage:1,hop:90});
 }
 function updateExtraEnemy(e,d){
@@ -41,7 +43,7 @@ function updateExtraEnemy(e,d){
 }
 function drawExtraEnemy(e){sprite(e.type,e.x-9,e.y-15,e.w+18,e.h+24)}
 function createExtraBoss(){
- const d=extraWorld(),hp=74+(level-8)*4;
+ const d=extraWorld(),hp=bossMaxHp(level);
  return {art:d.art,name:d.boss,extra:true,pattern:d.pattern,x:660,y:ground-132-(d.flying?125:0),w:128,h:132,hp,max:hp,vx:-1.2,vy:0,jumpTimer:90,attack:100,flash:0,damage:2,dead:false,phase:1,isBoss:true,flying:!!d.flying,flightTime:0,swoop:0};
 }
 function extraBossShot(b,angle,speed,gravity=0,shape='seed'){
@@ -57,6 +59,10 @@ function updateExtraBoss(b){
  else if(b.pattern==='orbit'||b.pattern==='ring'){const count=phase?10:7;for(let i=0;i<count;i++)extraBossShot(b,aim+i*Math.PI*2/count,2.8,0,'ring')}
  else if(b.pattern==='bomb'){for(let i=0;i<(phase?4:2);i++)extraBossShot(b,aim-.3+i*.2,3.8,.06,'chunk')}
  else if(b.pattern==='bounce'){for(let i=0;i<(phase?3:2);i++)extraBossShot(b,aim-.35+i*.35,3.4,.09,'berry')}
+ else if(b.pattern==='applesauce'){
+  const count=phase?5:3;for(let i=0;i<count;i++)extraBossShot(b,aim+(i-(count-1)/2)*.22,3.5,.035,'apple');
+  makeBossWave(b.x,player.x<b.x?-1:1);if(phase)makeBossWave(b.x+b.w,player.x<b.x?1:-1);
+ }
  else if(b.pattern==='cannon'){for(let i=0;i<(phase?3:1);i++)extraBossShot(b,aim+(i-(phase?1:0))*.18,4.4,.025,'chunk')}
  else{const count=phase?5:3;for(let i=0;i<count;i++)extraBossShot(b,aim+(i-(count-1)/2)*.18,b.pattern==='needle'?4.5:b.pattern==='fire'?3.9:3.1,b.pattern==='spore'?.018:0,b.pattern==='fire'?'fire':b.pattern==='spore'?'spore':'seed')}
  if(b.flying){b.swoop=55;b.swoopTarget=Math.max(180,Math.min(W-b.w-20,player.x-b.w/2))}
@@ -70,7 +76,10 @@ function updateBanquetShot(o){
 }
 function drawBanquetShot(o){
  x.save();x.fillStyle=o.color;x.strokeStyle='#473443';x.lineWidth=2;
- if(o.shape==='chunk'){x.fillRect(o.x,o.y,o.w,o.h);x.strokeRect(o.x,o.y,o.w,o.h)}
+ if(o.shape==='apple'){
+  x.beginPath();x.moveTo(o.x,o.y+12);x.quadraticCurveTo(o.x-3,o.y+1,o.x+7,o.y+4);x.quadraticCurveTo(o.x+18,o.y-3,o.x+18,o.y+11);x.quadraticCurveTo(o.x+9,o.y+24,o.x,o.y+12);x.fill();x.stroke();x.strokeStyle='#72934c';x.beginPath();x.moveTo(o.x+9,o.y+5);x.lineTo(o.x+13,o.y);x.stroke();
+ }
+ else if(o.shape==='chunk'){x.fillRect(o.x,o.y,o.w,o.h);x.strokeRect(o.x,o.y,o.w,o.h)}
  else{x.beginPath();x.ellipse(o.x+9,o.y+9,9,o.shape==='seed'?5:9,0,0,Math.PI*2);x.fill();x.stroke();if(o.shape==='ring'){x.fillStyle='#ffedbf';x.beginPath();x.arc(o.x+9,o.y+9,4,0,Math.PI*2);x.fill()}}
  x.restore();
 }
@@ -78,13 +87,21 @@ function drawExtraBackground(){
  const d=extraWorld(),W=viewWidth,H=viewHeight;
  const sky=x.createLinearGradient(0,0,0,H);sky.addColorStop(0,d.sky[0]);sky.addColorStop(1,d.sky[1]);x.fillStyle=sky;x.fillRect(0,-viewOffsetY,W,H+viewOffsetY);
  x.fillStyle=level===17?'#fff1c9':'#fff1af';x.beginPath();x.arc(W-145,92,34,0,Math.PI*2);x.fill();
+ if(d.prop==='schmarrn'){
+  for(let i=-1;i<Math.ceil(W/340)+1;i++){const px=i*340-(camera*.07%340);x.fillStyle='#94b6b9';x.beginPath();x.moveTo(px-160,365);x.lineTo(px,125);x.lineTo(px+190,365);x.closePath();x.fill();x.fillStyle='#fff7e5';x.beginPath();x.moveTo(px,125);x.lineTo(px+48,185);x.lineTo(px+12,174);x.lineTo(px-16,199);x.lineTo(px-43,190);x.closePath();x.fill()}
+  x.fillStyle='rgba(255,253,237,.8)';for(let i=0;i<26;i++){const px=(i*113-camera*.08+W*3)%W,py=(i*61+tick*.22)%H;x.fillRect(px,py,2,2)}
+ }
  for(let row=0;row<3;row++){x.fillStyle=d.floor[row%2];x.globalAlpha=.22+row*.12;x.beginPath();x.moveTo(0,H);for(let px=-70;px<W+80;px+=70)x.lineTo(px,300+row*65-Math.abs(Math.sin((px+camera*(.08+row*.1))*.005))*90-cameraY*.12);x.lineTo(W,H);x.closePath();x.fill()}x.globalAlpha=1;
  for(let i=-1;i<Math.ceil(W/210)+2;i++)drawExtraLandmark(i*210-(camera*.16%210),435-cameraY*.16,d,true);
  if(level===17){x.fillStyle='#f6efc9';for(let i=0;i<50;i++)x.fillRect((i*137)%W,15+(i*73)%220,2,2)}
 }
 function drawExtraLandmark(px,base,d,distant=false){
  x.save();x.translate(px,base);if(distant)x.scale(.65,.65);x.strokeStyle='#4a4c54';x.lineWidth=3;x.fillStyle=d.accent;
- if(d.prop==='plant'||d.prop==='jungle'){
+ if(d.prop==='schmarrn'){
+  x.fillStyle='#eee9d8';x.strokeStyle='#809da2';x.beginPath();x.ellipse(0,-11,87,17,0,0,Math.PI*2);x.fill();x.stroke();
+  for(let j=0;j<7;j++){const px=-58+(j%4)*36+(j>3?18:0),py=-35-(j>3?28:0);x.fillStyle=j%2?'#edbf77':'#dca261';x.strokeStyle='#996536';x.beginPath();x.moveTo(px-18,py-9);x.lineTo(px+9,py-13);x.lineTo(px+22,py+4);x.lineTo(px+12,py+21);x.lineTo(px-14,py+17);x.closePath();x.fill();x.stroke();x.fillStyle='#fff8e9';x.fillRect(px-12,py-5,22,4);x.fillRect(px+3,py+6,8,3);x.fillStyle='#65463e';x.beginPath();x.ellipse(px-3,py+8,5,3,-.3,0,Math.PI*2);x.fill()}
+  x.fillStyle='#f2cd80';x.strokeStyle='#a17c45';x.beginPath();x.ellipse(59,-30,25,12,0,0,Math.PI*2);x.fill();x.stroke();
+ }else if(d.prop==='plant'||d.prop==='jungle'){
   x.strokeStyle='#477b4e';x.lineWidth=7;x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(-12,-90,0,-175);x.stroke();
   for(let j=0;j<4;j++){x.fillStyle='#6ea656';x.beginPath();x.ellipse((j%2?1:-1)*23,-40-j*30,28,10,j%2?.4:-.4,0,Math.PI*2);x.fill()}
   if(d.prop==='plant'){x.fillStyle='#df6558';x.beginPath();x.arc(15,-115,24,0,Math.PI*2);x.fill()}else{x.fillStyle='#e1c15f';x.beginPath();x.ellipse(0,-165,31,46,0,0,Math.PI*2);x.fill()}
@@ -103,6 +120,13 @@ function drawExtraLandmark(px,base,d,distant=false){
   else{x.fillStyle=d.floor[1];x.fillRect(23,-202,24,67);x.strokeRect(23,-202,24,67)}
  }
  x.restore();
+}
+function drawSchmarrnSurface(left,right,surface){
+ x.fillStyle='#f8e1aa';x.fillRect(left,surface,right-left,12);x.fillStyle='#fff9ee';x.fillRect(left,surface,right-left,4);
+ for(let px=Math.ceil(left/43)*43;px<right;px+=43){x.fillStyle='#73513f';x.beginPath();x.ellipse(px+6,surface+8,4,2.5,-.3,0,Math.PI*2);x.fill();x.fillStyle='#fff9ee';x.fillRect(px+17,surface+6,9,2)}
+}
+function drawSchmarrnPlatform(p){
+ if(!p.schmarrn)return false;x.fillStyle='#dba363';x.strokeStyle='#996536';x.lineWidth=2;x.fillRect(p.x,p.y,p.w,p.h);x.strokeRect(p.x,p.y,p.w,p.h);drawSchmarrnSurface(p.x,p.x+p.w,p.y);return true;
 }
 function drawExtraWorldProp(tree){
  const d=extraWorld();drawExtraLandmark(tree.x,tree.baseY??ground,d);

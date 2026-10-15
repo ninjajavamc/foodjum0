@@ -1,6 +1,6 @@
 // Two-player online co-op: pinned local PeerJS, encrypted WebRTC, authoritative host.
 // The guest sends controls, never positions, health, inventories or enemy damage.
-const ONLINE_PROTOCOL=1,ONLINE_KEYS=['a','d','w','s','ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','touchLeft','touchRight','touchUp','touchDown','touchJump'];
+const ONLINE_PROTOCOL=2,ONLINE_KEYS=['a','d','w','s','ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','touchLeft','touchRight','touchUp','touchDown','touchJump'];
 const online={active:false,role:'',peer:null,conn:null,code:'',remote:null,choice:null,remoteChoice:null,modal:'',remoteModal:'',context:null,queue:[],teamScore:0,epoch:0,sentEpoch:-1,seq:0,lastSeq:-1,lastInput:0,lastReceive:0,lastSend:0,lastControls:0,generation:0,closing:false,panel:null};
 let peerLibraryPromise=null;
 function onlineCode(length=8){const a='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',bytes=new Uint8Array(length);crypto.getRandomValues(bytes);return [...bytes].map(b=>a[b%a.length]).join('')}
@@ -63,7 +63,7 @@ function onlineBindConnection(conn,timeout){
 function onlineCloseTransport(){
  online.generation++;online.closing=true;online.active=false;
  const conn=online.conn,peer=online.peer;online.conn=null;online.peer=null;conn?.close?.();peer?.destroy?.();
- online.remote=null;online.remoteChoice=null;online.role='';online.queue=[];online.modal='';online.remoteModal='';online.context=null;online.lastSeq=-1;online.sentEpoch=-1;online.lastReceive=0;online.closing=false;
+ online.remote=null;online.remoteChoice=null;online.role='';online.queue=[];online.modal='';online.remoteModal='';online.context=null;online.lastSeq=-1;online.sentEpoch=-1;online.lastReceive=0;online.sentState=null;online.receivedState=null;online.controlsSignature='';online.closing=false;
  onlineUiConnected(false);const room=document.querySelector('#onlineRoom');if(room)room.hidden=true;
 }
 function onlineFail(text){onlineCloseTransport();onlineMenu();onlineStatus(text)}
@@ -80,6 +80,7 @@ function onlineReceive(packet){
  if(online.role==='host'){
   if(packet.type==='hello'&&!online.active&&Number.isInteger(packet.char)&&packet.char>=0&&packet.char<5&&Number.isInteger(packet.buddy)&&packet.buddy>=0&&packet.buddy<4){online.remoteChoice={char:packet.char,buddy:packet.buddy};onlineUiConnected(true);onlineStatus('Freund ist da! Der Gastgeber kann jetzt gemeinsam starten.');return}
   if(!online.active||!online.remote)return;
+  if(packet.type==='resync'){online.sentEpoch=-1;return}
   if(packet.type==='input'){const input={};for(const key of ONLINE_KEYS)input[key]=packet.keys?.[key]===true;online.remote.input=input;online.lastInput=performance.now()}
   if(packet.type==='modal'&&['','inventory','crafting'].includes(packet.value)){online.remoteModal=packet.value;online.remote.input={}}
   if(packet.type==='action'&&online.queue.length<30&&typeof packet.action==='string')online.queue.push({action:packet.action,arg:packet.arg});
@@ -214,19 +215,53 @@ function onlineCanRevive(){return online.active&&!player.down&&onlineOthers().so
 function addScore(amount){if(online.active&&online.role==='host'){online.teamScore+=amount;for(const p of onlinePlayers())p.score=online.teamScore}else player.score+=amount}
 function onlineCatapultOccupied(o){return onlinePlayers().some(p=>p.seatedCatapult===o)}
 function onlineOwnBoomerang(o){if(online.active&&online.role==='host'&&o.onlineOwner==='guest')onlineWithActor(online.remote,()=>updateBananaBoomerang(o));else updateBananaBoomerang(o)}
+// Reliable, ordered deltas avoid retransmitting whole static maps and enemy records.
+function onlineStateDelta(packet,previous){
+ if(!previous||packet.map||packet.epoch!==previous.epoch)return packet;
+ const delta={v:ONLINE_PROTOCOL,type:'state',seq:packet.seq,epoch:packet.epoch,base:previous.seq,fields:{},arrays:{}};
+ for(const [key,value] of Object.entries(packet)){
+  if(['v','type','seq','epoch'].includes(key)||JSON.stringify(value)===JSON.stringify(previous[key]))continue;
+  const old=previous[key];
+  if(['objects','enemies','platforms','particles','defeated'].includes(key)&&Array.isArray(old)&&old.length===value.length){
+   const changes=[];for(let i=0;i<value.length;i++){
+    if(JSON.stringify(value[i])===JSON.stringify(old[i]))continue;
+    const set={},remove=[];for(const [name,field] of Object.entries(value[i]))if(JSON.stringify(field)!==JSON.stringify(old[i][name]))set[name]=field;
+    for(const name of Object.keys(old[i]))if(!(name in value[i]))remove.push(name);
+    changes.push({i,set,remove});
+   }
+   if(JSON.stringify(changes).length<JSON.stringify(value).length){delta.arrays[key]=changes;continue}
+  }
+  delta.fields[key]=value;
+ }
+ return JSON.stringify(delta).length<JSON.stringify(packet).length?delta:packet;
+}
+function onlineExpandState(packet){
+ if(packet.base===undefined)return packet;
+ const previous=online.receivedState;
+ if(!previous||previous.seq!==packet.base||previous.epoch!==packet.epoch){if(online.conn?.open)online.conn.send({v:ONLINE_PROTOCOL,type:'resync'});return null}
+ const full=onlinePlain(previous);Object.assign(full,packet.fields,{v:packet.v,type:'state',seq:packet.seq,epoch:packet.epoch});
+ for(const [key,changes] of Object.entries(packet.arrays||{})){
+  if(!['objects','enemies','platforms','particles','defeated'].includes(key)||!Array.isArray(full[key])||!Array.isArray(changes))return null;
+  for(const change of changes){if(!Number.isInteger(change.i)||!full[key][change.i]||!change.set||!Array.isArray(change.remove))return null;Object.assign(full[key][change.i],change.set);for(const name of change.remove)delete full[key][change.i][name]}
+ }
+ return full;
+}
 function onlineSendState(force=false){
  if(!online.conn?.open||online.role!=='host'||!online.active||!online.remote)return;
- if((online.conn.dataChannel?.bufferedAmount||0)>500000)return;
+ if((online.conn.dataChannel?.bufferedAmount||0)>64000)return;
  const r=online.remote,phase=online.remoteModal||['inventory','crafting'].includes(screen)?'paused':screen;
  const packet={v:ONLINE_PROTOCOL,type:'state',seq:++online.seq,epoch:online.epoch,level,levelWidth,doorX,phase,door,message,tick,timer,playerDeathTimer,teamScore:online.teamScore,boss:boss?onlinePlain(boss):null,players:[onlineActorPacket(player,selected,companion,secretCompanion,mandarinBabies),onlineActorPacket(r.p,r.char,r.buddy,r.bonus,r.babies)],objects:objects.map(onlinePlain),enemies:enemies.map(onlinePlain),platforms:platforms.map(onlinePlain),lavaPits:onlinePlain(lavaPits),cliffs:onlinePlain(cliffs),secretPassages:secretPassages.map(onlinePlain),particles:particles.slice(-200).map(onlinePlain),defeated:defeated.map(onlinePlain),worldWind:onlinePlain(worldWind),kitchenWeather:onlinePlain(kitchenWeather),cloudRain:onlinePlain(cloudRain),undergroundTrip:undergroundTrip?onlinePlain({hidden:undergroundTrip.hidden,theme:undergroundTrip.theme,styleSeed:undergroundTrip.styleSeed}):null};
  if(force||online.sentEpoch!==online.epoch){packet.map={trees:trees.map(onlinePlain),hooks:hooks.map(onlinePlain),terraces:terraces.map(onlinePlain),obstacles:obstacles.map(onlinePlain)};online.sentEpoch=online.epoch}
- online.conn.send(packet);
+ const wire=onlineStateDelta(packet,online.sentState);online.sentState={...packet};delete online.sentState.map;online.conn.send(wire);
 }
 function onlineApplyState(packet){
+ packet=onlineExpandState(packet);if(!packet)return;
  if(!LEVEL_SETTINGS[packet.level]||!Array.isArray(packet.players)||packet.players.length!==2||packet.seq<=online.lastSeq)return;
  if(!packet.players.every(a=>Number.isInteger(a.char)&&a.char>=0&&a.char<5&&Number.isFinite(a.p?.x)&&Number.isFinite(a.p?.y)))return;
  if(!Array.isArray(packet.objects)||packet.objects.length>1500||!Array.isArray(packet.enemies)||packet.enemies.length>200)return;
  if(packet.epoch!==online.epoch&&!packet.map)return;
+ const sceneChanged=!online.active||packet.epoch!==online.epoch;
+ online.receivedState=onlinePlain(packet);delete online.receivedState.map;
  online.lastSeq=packet.seq;online.epoch=packet.epoch;online.active=true;online.phase=packet.phase;online.teamScore=packet.teamScore;
  if(online.panel)online.panel.hidden=true;
  level=packet.level;selectedLevel=level;levelWidth=packet.levelWidth;doorX=packet.doorX;boss=packet.boss;door=packet.door;message=packet.message;tick=packet.tick;timer=packet.timer;playerDeathTimer=packet.playerDeathTimer;
@@ -235,17 +270,23 @@ function onlineApplyState(packet){
  const lists={platforms,lavaPits,cliffs};for(const name of Object.keys(lists)){lists[name].length=0;lists[name].push(...packet[name])}
  if(packet.map){const lists={trees,hooks,terraces,obstacles};for(const name of Object.keys(lists)){lists[name].length=0;lists[name].push(...packet.map[name])}}
  if(!['play','paused'].includes(packet.phase))online.modal='';
- screen=online.modal||packet.phase;const target=cameraTargetX(player.x,boss?W:levelWidth);camera+=(target-camera)*.2;
- const targetY=boss&&level!==5?0:Math.min(floorAtX(player.x+player.w/2)-ground,player.y-170);cameraY+=(targetY-cameraY)*.2;
+ screen=online.modal||packet.phase;
+ if(sceneChanged){camera=cameraTargetX(player.x,boss?W:levelWidth);cameraY=onlineCameraTargetY();online.lastCameraFrame=0}
+}
+function onlineCameraTargetY(){return boss&&level!==5?0:Math.min(floorAtX(player.x+player.w/2)-ground,player.y-170)}
+function onlineGuestCamera(now){
+ const dt=online.lastCameraFrame?Math.max(0,Math.min(50,now-online.lastCameraFrame)):1000/60;online.lastCameraFrame=now;
+ const ease=1-Math.pow(.88,dt/(1000/60));camera+=(cameraTargetX(player.x,boss?W:levelWidth)-camera)*ease;cameraY+=(onlineCameraTargetY()-cameraY)*ease;
 }
 function onlineFrame(now){
  if(!online.active)return;
  if(online.lastReceive&&now-online.lastReceive>15000){onlineFail('Verbindung unterbrochen. Beide müssen den Spiel-Tab offen lassen.');return}
  if(online.role==='host'){
-  onlineProcessActions();if(now-online.lastSend>=80){online.lastSend=now;onlineSendState()}
- }else if(now-online.lastControls>=33){
-  online.lastControls=now;const input={};if(screen==='play')for(const key of ONLINE_KEYS)input[key]=keys[key]===true;
-  online.conn?.send({v:ONLINE_PROTOCOL,type:'input',keys:input});
+  onlineProcessActions();if(now-online.lastSend>=50){online.lastSend=now;onlineSendState()}
+ }else{
+  onlineGuestCamera(now);
+  const input={};if(screen==='play')for(const key of ONLINE_KEYS)input[key]=keys[key]===true;
+  const signature=JSON.stringify(input);if(signature!==online.controlsSignature||now-online.lastControls>=100){online.controlsSignature=signature;online.lastControls=now;online.conn?.send({v:ONLINE_PROTOCOL,type:'input',keys:input})}
  }
 }
 function drawOnlinePartner(){

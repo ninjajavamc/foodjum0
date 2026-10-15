@@ -26,7 +26,7 @@
 <script src="scripts/viewport.js?v=coop1"></script>
 <script src="scripts/audio.js?v=coop1"></script>
 <script src="scripts/worlds.js?v=coop1"></script>
-<script src="scripts/expansion.js?v=coop1"></script>
+<script src="scripts/expansion.js?v=schmarrn18"></script>
 <script src="scripts/world-art.js?v=coop1"></script>
 <script src="scripts/kitchen-art.js?v=coop1"></script>
 <script src="scripts/frost-art.js?v=coop1"></script>
@@ -35,22 +35,22 @@
 <script src="scripts/clouds.js?v=coop1"></script>
 <script src="scripts/pudding.js?v=coop1"></script>
 <script src="scripts/weather.js?v=coop1"></script>
-<script src="scripts/game-features.js?v=coop1"></script>
+<script src="scripts/game-features.js?v=schmarrn18"></script>
 <script src="scripts/companions.js?v=coop1"></script>
 <script src="scripts/crafting.js?v=coop1"></script>
-<script src="scripts/scenery.js?v=coop1"></script>
+<script src="scripts/scenery.js?v=schmarrn18"></script>
 <script src="scripts/abilities.js?v=coop1"></script>
 <script src="scripts/structures.js?v=coop1"></script>
 <script src="scripts/traversal.js?v=coop1"></script>
 <script src="scripts/sewers.js?v=coop1"></script>
-<script src="scripts/menus.js?v=coop1"></script>
-<script src="scripts/bosses.js?v=coop1"></script>
-<script src="scripts/boss-moves.js?v=coop1"></script>
+<script src="scripts/menus.js?v=schmarrn18"></script>
+<script src="scripts/bosses.js?v=schmarrn18"></script>
+<script src="scripts/boss-moves.js?v=schmarrn18"></script>
 <script src="scripts/dessert-bosses.js?v=coop1"></script>
 <script src="scripts/secrets.js?v=coop1"></script>
-<script src="scripts/tutorial.js?v=coop1"></script>
+<script src="scripts/tutorial.js?v=schmarrn18"></script>
 <script src="scripts/player-motion.js?v=coop1"></script>
-<script src="scripts/online.js?v=coop1"></script>
+<script src="scripts/online.js?v=schmarrn18"></script>
 <script>
 const c=document.querySelector('#game'), x=c.getContext('2d');
 const W=1000,H=620,ground=525,MAX_HP=20,WORLD_BOTTOM=1100;
@@ -227,7 +227,7 @@ function update(){
 }
 const art={};
 for(const name of ['spaghetti','mandarine','banane','kartoffel','granatapfel','honey','lemon','peel','cola','hat','door','boss','gummy','lunchbox','mushroom','gum','wasabi','mandarin-piece','sponge','sausage-dog','key','toothpaste','toothbrush','material-sugar','material-herbs','material-spice','material-stone','material-spoon','material-wood','catapultKit','wallKit','boss-fork','boss-spoon','boss-knife','springKit','secret-wall','ladderKit','moldCheese','donut','boss-cotton','boss-popcorn','boss-bigmac','pudding','taco','boss-fishstick','maki','marshmallow','boss-croissant','chili',...Object.keys(EXTRA_ENEMIES),...Object.values(EXTRA_WORLDS).map(d=>d.art)]){
- const image=new Image(); image.src='assets/sprites/'+name+'.svg?v=world17'; art[name]=image;
+ const image=new Image(); image.src='assets/sprites/'+name+'.svg?v=schmarrn18'; art[name]=image;
 }
 function sprite(name,left,top,width,height){
  const image=art[name];
@@ -293,7 +293,7 @@ function drawScenery(){
  }
  if(!boss)for(const p of platforms){
   if(p.moving||p.x+p.w<camera-30||p.x>camera+viewWidth+30)continue;
-  if(drawCloudPlatform(p))continue;
+  if(drawCloudPlatform(p)||drawSchmarrnPlatform(p))continue;
   x.fillStyle='#9a9f9d';x.strokeStyle='#4f5c58';x.lineWidth=3;x.beginPath();x.moveTo(p.x,p.y+p.h);x.lineTo(p.x+7,p.y+10);x.lineTo(p.x+18,p.y);x.lineTo(p.x+p.w-18,p.y);x.lineTo(p.x+p.w-4,p.y+13);x.lineTo(p.x+p.w,p.y+p.h);x.closePath();x.fill();x.stroke();
   x.strokeStyle='#c9d0c8';x.beginPath();x.moveTo(p.x+18,p.y+8);x.lineTo(p.x+p.w-23,p.y+8);x.stroke();
  }

@@ -61,6 +61,7 @@ function drawWorldTree(tree){
 function drawGrassStrip(left,right,surface){
  const from=Math.max(left,camera-90),to=Math.min(right,camera+viewWidth+90);
  if(extraWorld()){
+  if(extraWorld().prop==='schmarrn'){drawSchmarrnSurface(from,to,surface);return}
   x.fillStyle=extraWorld().accent;x.fillRect(from,surface,to-from,10);x.strokeStyle=extraWorld().floor[1];x.lineWidth=2;
   for(let px=Math.ceil(from/32)*32;px<to;px+=32){x.beginPath();x.moveTo(px,surface+2);x.lineTo(px+12,surface+8);x.stroke()}return;
  }

@@ -1,10 +1,13 @@
+function bossMaxHp(world){return world<=1?19:34+(world-2)*8}
+function bossAttackRate(world){return world===0?.85:world===1?1:world===2?1.15:1.25+(world-3)*.05}
+function bossMoveScale(world){return 1+Math.max(0,world-1)*.025}
 function bossTargets(){return !boss||boss.dead?[]:boss.members?boss.members.filter(b=>!b.dead):[boss]}
 function bossBodyDistance(px,py,b){return Math.hypot(Math.max(b.x-px,0,px-b.x-b.w),Math.max(b.y-py,0,py-b.y-b.h))}
 function findBossTarget(px,py,range){return bossTargets().filter(b=>b.hp>0&&bossBodyDistance(px,py,b)<range).sort((a,b)=>bossBodyDistance(px,py,a)-bossBodyDistance(px,py,b))[0]}
 function beginBossFight(){
  if(extraWorld())boss=createExtraBoss();
  else if(level>=3){
-  const artName={3:'boss-croissant',4:'boss-popcorn',5:'boss-bigmac',6:'boss-fishstick',7:'boss-cotton'}[level],hp={3:40,4:46,5:54,6:62,7:70}[level],height=level===6?220:level===5?160:level===4?122:110;
+  const artName={3:'boss-croissant',4:'boss-popcorn',5:'boss-bigmac',6:'boss-fishstick',7:'boss-cotton'}[level],hp=bossMaxHp(level),height=level===6?220:level===5?160:level===4?122:110;
   boss={art:artName,x:650,y:ground-height-([3,6,7].includes(level)?140:0),w:level===6?90:[3,7].includes(level)?150:level===5?138:116,h:height,hp,max:hp,vx:-1.2,vy:0,jumpTimer:75,attack:130,flash:0,damage:2,dead:false,phase:1,isBoss:true,flying:[3,7].includes(level),swimming:level===6,flightTime:0,swoop:0};
  }else if(level===2||(isTutorial()&&tutorialBossRound===2)){
   const members=[{art:'boss-fork',x:480,hp:10,max:10},{art:'boss-spoon',x:650,hp:14,max:14},{art:'boss-knife',x:820,hp:10,max:10}].map((b,i)=>({...b,y:ground-108,w:65,h:108,attack:100+i*35,vx:i===2?-1:.9,vy:0,jumpTimer:60+i*18,flash:0,damage:2,dead:false,dash:0,isBoss:true}));
@@ -40,7 +43,8 @@ function updateBossFight(previousBottom){
  updateBossSpecial();
  for(const b of bossTargets()){
   if(b.hp<=0){b.dead=true;defeated.push({art:b.art,x:b.x+b.w/2,y:b.y+45,vx:0,vy:-3,angle:0,life:55,maxLife:55,size:120});continue}
-  if(b.swimming)updateFishstickBoss(b);else if(b.flying)updateCottonFlight(b);else updateBossJump(b);b.attack-=level>=3?1.25:level===2?1.15:isTutorial()?.85:1;b.flash=Math.max(0,b.flash-1);
+  const previousBossX=b.x;
+  if(b.swimming)updateFishstickBoss(b);else if(b.flying)updateCottonFlight(b);else updateBossJump(b);b.attack-=bossAttackRate(level);b.flash=Math.max(0,b.flash-1);
   if(b.extra)updateExtraBoss(b);
   else if(b.swimming){/* Movement and crumb volleys are updated together above. */}
   else if(b.art==='boss-croissant'){if(b.attack<=0)fireCroissantBolts(b)}
@@ -62,6 +66,7 @@ function updateBossFight(previousBottom){
    if(b.dash>0){b.dash--;b.x+=b.vx;b.x=Math.max(390,Math.min(875,b.x))}
    if(b.attack<=0){b.attack=boss.phase===2?95:160;b.dash=boss.phase===2?45:30;b.vx=(player.x<b.x?-1:1)*(boss.phase===2?5.6:3.5);message=boss.phase===2?'Messer: Turbo-Schnitt!':'Das Messer stürmt!'}
   }
+  b.x=Math.max(b.swimming?240:0,Math.min(W-b.w-(b.swimming?25:0),previousBossX+(b.x-previousBossX)*bossMoveScale(level)));
   if(canStomp(b,previousBottom,b.previousY)){b.hp--;b.flash=8;bounceAfterStomp(b,12)}else if(rect(player,b))hitPlayer(2,player.x<b.x?-4:4,110)
  }
  if(boss.members)boss.hp=boss.members.reduce((sum,b)=>sum+Math.max(0,b.hp),0);

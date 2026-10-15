@@ -1,6 +1,6 @@
 // Mobile bosses and one clearly telegraphed 10-HP special per fight.
 function updateBossJump(b){
- b.previousY=b.y;b.vy=b.vy||0;b.jumpTimer=(b.jumpTimer??60)-1;
+ b.previousY=b.y;b.vy=b.vy||0;b.jumpTimer=(b.jumpTimer??60)-(1+Math.max(0,level-1)*.03);
  if(b.jumpTimer<=0&&b.y+b.h>=ground-1){b.vy=level===5?-5.5:b.art==='boss'?-10.8:-9.8;b.jumpTimer=level>=2?115:150}
  b.y+=b.vy;b.vy+=.42*worldGravity()/.58;
  if(b.y+b.h>=ground){b.y=ground-b.h;b.vy=0}
@@ -22,6 +22,9 @@ function drawBossWarning(){
 }
 function drawBossHeavyWave(o){
  if(o.flavor==='boss-fishstick'){x.save();x.fillStyle='rgba(142,227,248,.5)';x.strokeStyle='#f2fcff';x.lineWidth=4;x.beginPath();x.arc(o.x+125,o.y+125,125,0,Math.PI*2);x.fill();x.stroke();for(let i=0;i<8;i++){x.beginPath();x.arc(o.x+125+Math.cos(i)*84,o.y+125+Math.sin(i)*84,12,0,Math.PI*2);x.stroke()}x.restore();return}
+ if(o.flavor==='boss-applesauce'){
+  x.save();x.fillStyle='rgba(232,195,102,.85)';x.strokeStyle='#fff5cf';x.lineWidth=3;for(let i=0;i<9;i++){x.beginPath();x.ellipse(o.x+14+i*28,ground-13,20,16+(i%3)*6,0,0,Math.PI*2);x.fill();x.stroke()}x.restore();return;
+ }
  if(['boss-cotton','boss-croissant','boss-popcorn','boss-bigmac'].includes(o.flavor)){
   const color=o.flavor==='boss-croissant'?'#b9a0e4':o.flavor==='boss-cotton'?'#f2a0ce':o.flavor==='boss-popcorn'?'#ffe29a':'#85c56e';x.save();x.fillStyle=color;x.globalAlpha=.75;x.fillRect(o.x,o.y,o.w,o.h);x.strokeStyle='#fff9e7';x.lineWidth=3;
   for(let i=0;i<9;i++){x.beginPath();x.arc(o.x+14+i*28,ground-25-Math.sin(tick+i)*8,18,0,Math.PI*2);x.fill();x.stroke()}x.restore();return;

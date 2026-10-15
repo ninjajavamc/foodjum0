@@ -1,7 +1,8 @@
 // Extra platforming, hook chaining, lunchbox items and cartoon effects. No dependencies.
 const ITEM_TYPES=['mushroom','gum','wasabi','marshmallow'];
-const ITEM_NAMES={marshmallow:'Marshmallow-Gleiten',mushroom:'Pilz (+1 Leben)',gum:'Kaugummi-Blase',wasabi:'Wasabi-Feuer',catapultKit:'Katapult-Bausatz',wallKit:'Steinmauer-Bausatz',springKit:'Sprungfeder',ladderKit:'Leiter-Bausatz'};
+const ITEM_NAMES={marshmallow:'Marshmallow-Gleiten',get mushroom(){return 'Pilz (+'+mushroomHealing()+' Leben)'},gum:'Kaugummi-Blase',wasabi:'Wasabi-Feuer',catapultKit:'Katapult-Bausatz',wallKit:'Steinmauer-Bausatz',springKit:'Sprungfeder',ladderKit:'Leiter-Bausatz'};
 const ITEM_SHORT_NAMES={marshmallow:'Marshmallow',mushroom:'Pilz',gum:'Kaugummi',wasabi:'Wasabi',catapultKit:'Katapult',wallKit:'Steinmauer',springKit:'Sprungfeder',ladderKit:'Leiter'};
+function mushroomHealing(world=level){return Math.min(MAX_HP,Math.max(1,Number(world)||1))}
 function baseFloorAtX(pos){return terraces.find(t=>pos>=t.x&&pos<t.x+t.w)?.y??ground}
 function floorAtX(pos){if(boss)return ground;const room=secretPassages.find(r=>r.open&&pos>=r.x&&pos<r.x+r.w);return room?room.base+105:baseFloorAtX(pos)}
 function buildTerraces(){
@@ -81,7 +82,7 @@ function useItem(){
   if(!itemAllowed(item)){message='Auf dem Mond sind Sprungfedern gesperrt.';return}
   if((item==='catapultKit'||item==='wallKit'||item==='ladderKit')&&!placeStructure(item))return;
   playSound('pickup');storage.list.splice(storage.index,1);player[storage.indexKey]=Math.min(storage.index,Math.max(0,storage.list.length-1));if(storage.category==='builds'&&!storage.list.length)player.inventoryCategory='powers';
-  if(item==='mushroom'){player.hp=Math.min(MAX_HP,player.hp+1);message='Pilz: +1 Leben!'}
+  if(item==='mushroom'){const healing=mushroomHealing(),before=player.hp;player.hp=Math.min(MAX_HP,player.hp+healing);message='Heilpilz: +'+(player.hp-before)+' HP!'}
   if(item==='gum'){player.bubble=120;player.swing=null;player.vy=-3;player.onGround=false;message='Die Kaugummi-Blase trägt dich nach oben!'}
   if(item==='springKit'){player.jumpBoost=300;player.vy=-18;player.onGround=false;message='Sprungfeder! 5 Sekunden besonders hohe Sprünge.'}
   if(item==='marshmallow'){player.marshmallowTime=900;message=showGameplayHints()?'Marshmallow: 15 Sekunden! Beim Fallen Space / Sprungtaste halten zum Gleiten.':'Marshmallow · 15 Sekunden';}
@@ -185,7 +186,7 @@ function drawExtraTerrain(){
   for(const edge of [cliff.x,cliff.x+cliff.w]){x.beginPath();x.moveTo(edge,cliff.y);x.lineTo(edge,cliff.y+28);x.lineTo(edge+(edge===cliff.x?-8:8),cliff.y+45);x.lineTo(edge,cliff.y+68);x.stroke()}
   x.fillStyle='#7192a0';x.beginPath();x.moveTo(cliff.x+15,cliff.y+180);x.lineTo(cliff.x+cliff.w/2,cliff.y+150);x.lineTo(cliff.x+cliff.w-10,cliff.y+180);x.fill();
  }
- for(const p of platforms)if(p.moving&&p.x+p.w>camera-50&&p.x<camera+viewWidth+50){if(drawCloudPlatform(p))continue;x.fillStyle='#cdab7b';x.strokeStyle='#684c3f';x.lineWidth=3;x.fillRect(p.x,p.y,p.w,p.h);x.strokeRect(p.x,p.y,p.w,p.h)}
+ for(const p of platforms)if(p.moving&&p.x+p.w>camera-50&&p.x<camera+viewWidth+50){if(drawCloudPlatform(p)||drawSchmarrnPlatform(p))continue;x.fillStyle='#cdab7b';x.strokeStyle='#684c3f';x.lineWidth=3;x.fillRect(p.x,p.y,p.w,p.h);x.strokeRect(p.x,p.y,p.w,p.h)}
  for(const o of obstacles){
   if(o.x+o.w<camera-50||o.x>camera+viewWidth+50)continue;
   if(undergroundTrip&&drawSewerObstacle(o))continue;
@@ -233,7 +234,7 @@ function drawVictory(){
  x.textAlign='center';x.fillStyle='#ffe5a0';x.font='900 48px system-ui';x.fillText('GRATULATION!',W/2,142);x.fillStyle='#fff';x.font='24px system-ui';x.fillText(isTutorial()?'Totarial: Übungsboss besiegt!':worldName()+' geschafft!',W/2,190);x.font='18px system-ui';x.fillText('Punkte: '+player.score,W/2,229);
  victoryButtons=[{id:'retry',x:275,y:275,w:450,h:58,label:'Level nochmal  (R / Enter)'},{id:'menu',x:275,y:349,w:450,h:58,label:'Hauptmenü  (M)'},{id:'next',x:275,y:423,w:450,h:58,label:isTutorial()?(tutorialBossRound===1?'Besteck-Trio üben (N)':'Weiter zum Wiesenwald (N)'):LEVEL_SETTINGS[level+1]?'Weiter zu '+worldName(level+1)+' (N)':'Weitere Welten – kommen später',disabled:!LEVEL_SETTINGS[level+1]}];
  for(const b of victoryButtons){x.fillStyle=b.disabled?'#373f54':b.id==='retry'?'#77b49a':'#748fbb';x.fillRect(b.x,b.y,b.w,b.h);x.fillStyle=b.disabled?'#9ca7ba':'#fff';x.font='bold 20px system-ui';x.fillText(b.label,b.x+b.w/2,b.y+37)}
- x.fillStyle='#b8c4cd';x.font='15px system-ui';x.fillText('17 Welten · Totarial · Alle Welten direkt auswählbar',W/2,527);x.restore();
+ x.fillStyle='#b8c4cd';x.font='15px system-ui';x.fillText((Object.keys(LEVEL_SETTINGS).length-1)+' Welten · Totarial · Alle Welten direkt auswählbar',W/2,527);x.restore();
 }
 function drawItemHud(){
  x.save();x.textAlign='left';

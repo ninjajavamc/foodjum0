@@ -532,14 +532,14 @@ for(const world of [3,4,5,7]){
  run('selectedLevel='+world+';reset();startBoss();player.inv=100000;var bossStartY=boss.y;for(let i=0;i<180;i++){update();draw()}');
  assert(run('boss.art==='+JSON.stringify({3:'boss-croissant',4:'boss-popcorn',5:'boss-bigmac',7:'boss-cotton'}[world])),'The correct boss starts in World '+world);
  if(world===3)assert(run('boss.flying&&boss.y!==bossStartY&&boss.y+boss.h<ground&&objects.some(o=>o.type==="stormBolt")'),'Kitchen croissant flies and fires lightning');
- if(world===7)assert(run('boss.flying&&boss.max===70&&boss.y!==bossStartY&&objects.some(o=>o.type==="sugarPuff")'),'Cloud cotton candy flies and fires sugar puffs');
+ if(world===7)assert(run('boss.flying&&boss.max===bossMaxHp(level)&&boss.y!==bossStartY&&objects.some(o=>o.type==="sugarPuff")'),'Cloud cotton candy flies and fires sugar puffs');
  if(world===4)assert(run('objects.some(o=>o.type==="explosivePopcorn")'),'Popcorn shoots explosive kernels');
  if(world===5)assert(run('objects.some(o=>o.type==="pickleShot")'),'Triple Bigmac shoots its own projectiles');
  run('boss.hp=boss.max/2;updateBossFight(player.y+player.h)');assert(run('boss.phase===2&&boss.heavyCharge===89&&boss.heavyUsed'),'Half HP starts the telegraphed special');
  run('for(let i=0;i<89;i++)updateBossSpecial();var special=objects.find(o=>o.type==="bossHeavyWave");player.x=special.x+special.w/2-player.w/2;player.y=ground-player.h;player.hp=20;player.inv=0;updateBossProjectile(special)');assert.equal(run('player.hp'),10,'The marked special deals 10 HP in World '+world);
  run('player.inv=100000;for(let i=0;i<300;i++)updateBossFight(player.y+player.h)');assert.equal(run('boss.heavyCount'),1,'The powerful special is used only once per fight');
  run('boss.hp=0;for(let i=0;i<76;i++)update();draw()');assert.equal(run('screen'),'victory','The new boss can be defeated');
- assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),world===17,'Only the final world disables further progression');
+ assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),world===18,'Only the final world disables further progression');
 }
 run('selectedLevel=4;reset();startBoss();objects=[];fireExplosivePopcorn(boss);var kernel=objects[0];kernel.x=player.x;kernel.y=player.y;kernel.fuse=1;player.hp=20;player.inv=0;updateBossProjectile(kernel);var blast=objects.find(o=>o.type==="popcornBlast");drawBossProjectile(blast);updateBossProjectile(blast)');assert(run('kernel.exploded&&kernel.life===0&&player.hp===18'),'Explosive popcorn creates a real 2-HP blast');
 run('player.hp=20;player.inv=0;player.x=blast.cx+blast.radius+20;updateBossProjectile({...blast,life:14})');assert.equal(run('player.hp'),20,'Moving beyond the blast radius avoids popcorn damage');
@@ -694,14 +694,14 @@ canvas.getBoundingClientRect=()=>({left:0,top:0,width:768,height:1024});run('dra
 assert.equal(run('JSON.stringify([player.x,player.y,player.hp,player.inventory])'),beforeResize,'Rotating the screen does not teleport or reset the player');
 canvas.getBoundingClientRect=viewportBounds;context.devicePixelRatio=1;run('resizeGameCanvas()');
 // Ten complete new worlds, not just extra menu cards.
-assert.equal(run('Object.keys(LEVEL_SETTINGS).length'),18,'Seventeen worlds plus Totarial');
+assert.equal(run('Object.keys(LEVEL_SETTINGS).length'),19,'Eighteen worlds plus Totarial');
 assert.equal(run('Object.keys(EXTRA_ENEMIES).length'),5,'Exactly five new enemy identities');
-assert.equal(run('Object.keys(art).length'),64,'All fifteen new original sprites are registered');
+assert.equal(run('Object.keys(art).length'),65,'All expansion drawings including the Apfelmus boss are registered');
 run('screen="levelselect";selectedLevel=1;menuAction("pageNext");draw()');assert(run('worldMenuPage()===1&&menuButtons.some(b=>b.id==="level14")'),'Page two contains worlds 8–14');
 handlers.global.keydown({key:'3',repeat:false,preventDefault(){}});assert(run('screen==="choose"&&selectedLevel===10'),'Number keys select within the current page');
-run('screen="levelselect";selectedLevel=15;draw()');assert(run('worldMenuPage()===2&&menuButtons.some(b=>b.id==="level17")&&menuButtons.find(b=>b.id==="pageNext").disabled'),'Last page includes the final three worlds');
+run('screen="levelselect";selectedLevel=15;draw()');assert(run('worldMenuPage()===2&&menuButtons.some(b=>b.id==="level18")&&menuButtons.find(b=>b.id==="pageNext").disabled'),'Last page includes the Kaiserschmarrn-Alm');
 const expansionBosses=new Set(),expansionPatterns=new Set();
-for(let n=8;n<=17;n++){
+for(let n=8;n<=18;n++){
  run(`screen='levelselect';menuAction('level${n}');reset();player.inv=100000;draw()`);
  assert.equal(run('level'),n,'Multi-digit world selection is exact');
  assert(run('levelWidth===LEVEL_SETTINGS[level].width&&objects.some(o=>o.type==="key")&&objects.some(o=>o.type==="manhole")&&secretPassages.length>0'),'New worlds have full terrain, keys, sewers and secrets');
@@ -719,9 +719,9 @@ for(let n=8;n<=17;n++){
  run('for(let i=0;i<100;i++)update()');assert.equal(run('boss.heavyCount'),1,'No repeated heavy specials');
  run('player.hp=20;player.inv=0;updateBossProjectile({type:"banquetShot",x:player.x,y:player.y,w:18,h:18,vx:0,vy:0,gravity:0,life:10,damage:2})');assert.equal(run('player.hp'),18,'Ordinary new-boss attacks deal exactly two HP');
  run('player.inv=100000;boss.hp=0;for(let i=0;i<76;i++)update();draw()');
- assert(run('screen==="victory"'),'Every new boss can be defeated');assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),n===17,'Only world seventeen ends progression');
+ assert(run('screen==="victory"'),'Every new boss can be defeated');assert.equal(run('victoryButtons.find(b=>b.id==="next").disabled'),n===18,'Only world eighteen ends progression');
 }
-assert.equal(expansionBosses.size,10,'Ten different original boss drawings');assert.equal(expansionPatterns.size,10,'Ten different attack patterns');
+assert.equal(expansionBosses.size,11,'Eleven different original boss drawings');assert.equal(expansionPatterns.size,11,'Eleven different attack patterns');
 for(const type of run('Object.keys(EXTRA_ENEMIES)')){
  run(`selectedLevel=8;reset();objects=[];enemies=[];obstacles.length=0;platforms.length=0;terraces.length=0;cliffs.length=0;lavaPits.length=0;player.x=500;player.inv=100000;var def=EXTRA_ENEMIES['${type}'];var foe={type:'${type}',x:250,y:ground-def.h,w:def.w,h:def.h,hp:def.hp,damage:1,vx:0,vy:0,shoot:0,hop:0,dead:0,slow:0,onGround:true};enemies=[foe];update();draw()`);
  if(type==='radish')assert(run('foe.vy<0'),'Radish really hops');
@@ -729,4 +729,17 @@ for(const type of run('Object.keys(EXTRA_ENEMIES)')){
  run('player.x=foe.x;player.y=foe.y;player.hp=20;player.inv=0;update()');assert.equal(run('player.hp'),19,'New enemy contact deals one HP');
  run('objects=[];foe.y=ground-foe.h;foe.vy=0;foe.hop=999;foe.shoot=999;player.x=foe.x;player.y=foe.y-player.h-3;player.vy=4;player.onGround=false;player.inv=0;var oldFoeHp=foe.hp;update()');assert(run('foe.hp===oldFoeHp-1&&player.vy<0'),'Every new enemy can be stomped with a safe bounce');
 }
-console.log('PASS: 17 complete worlds, 10 new moving bosses with distinct attacks and single warned ten-HP specials, 5 new damageable enemy types, paged menu/keyboard/touch navigation, expanded proportional camera and all existing mechanics.');
+// Every level increases boss strength and mushroom healing; fixed damage rules remain.
+let lastBossHp=0,lastAttackRate=0,lastMoveScale=0;
+for(let n=1;n<=18;n++){
+ run(`selectedLevel=${n};reset();player.hp=1;player.inventory=['mushroom'];useItem();startBoss()`);
+ assert.equal(run('player.hp'),Math.min(20,1+n),'Mushrooms heal the current world number');
+ assert.equal(run('ITEM_NAMES.mushroom'),'Pilz (+'+n+' Leben)','Inventory describes the actual healing');
+ const hp=run('boss.max'),attack=run('bossAttackRate(level)'),move=run('bossMoveScale(level)');
+ assert(hp>lastBossHp&&attack>lastAttackRate&&move>lastMoveScale,'Every successive boss has more HP, faster attacks and faster movement');
+ assert.equal(hp,run('bossMaxHp(level)'));lastBossHp=hp;lastAttackRate=attack;lastMoveScale=move;
+ run("player.hp=19;player.inventory=['mushroom'];useItem()");assert.equal(run('player.hp'),20,'Even late-world mushrooms cannot exceed maximum HP');
+}
+run('selectedLevel=18;reset();draw();startBoss();boss.attack=0;updateExtraBoss(boss);draw()');assert(run('worldName(18)==="Kaiserschmarrn-Alm"&&boss.art==="boss-applesauce"&&boss.max===162&&objects.some(o=>o.shape==="apple"&&o.damage===2)'),'Kaiserschmarrn has its own Apfelmus boss and apple attacks');
+run('victoryAction("retry");draw()');assert(run('platforms.length>10&&platforms.every(p=>p.schmarrn)&&lavaPits.length===0'),'Kaiserschmarrn chunks are real, safe gap platforms');
+console.log('PASS: 18 worlds, original Kaiserschmarrn-Alm and Apfelmus boss, strictly increasing boss strength and mushroom healing, 11 expansion bosses, 5 enemy types, proportional camera and all existing mechanics.');

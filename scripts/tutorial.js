@@ -4,7 +4,7 @@ const TUTORIAL_LESSONS=[
  {x:150,title:'Willkommen in Totarial',lines:['A/D oder Pfeile: laufen. Space: springen.','Handy: die großen Tasten unten benutzen.','Esc / II pausiert. Weiter rechts lernst du alles.']},
  {x:650,title:'Springen, Lava und Klippen',lines:['Spring über Lava, Löcher und Stacheln.','Kisten und bewegliche Plattformen tragen dich.','Hier darfst du üben: verlorene Leben kommen zurück.']},
  {x:1400,title:'Gegner und Leben',lines:['Von oben auf Gegner springen: sicherer Stampfer.','Seitlicher Kontakt kostet Leben; Bosse kosten 2.','20 HP, Punkte und Abklingzeit stehen oben.','Honig-Gegner: seitlicher Kontakt bremst 3 s.']},
- {x:1850,title:'Powers ausprobieren',kind:'powers',lines:['W: Pilz + Kaugummi, Wasabi + Feder, Marshmallow.','1/2 wählt, F benutzt: Pilz heilt, Kaugummi trägt.','Wasabi: 10 s Feuer mit F. Feder: 5 s hohe Sprünge.']},
+ {x:1850,title:'Powers ausprobieren',kind:'powers',lines:['W: Pilz + Kaugummi, Wasabi + Feder, Marshmallow.','Pilz heilt je Welt mehr: Welt 1 +1 HP, Welt 2 +2 HP …','Wasabi: 10 s Feuer mit F. Feder: 5 s hohe Sprünge.']},
  {x:2200,title:'Marshmallow und Wind',kind:'wind',lines:['W gibt Marshmallow und startet Übungswind.','F aktiviert 15 s. Beim Fallen Space halten: gleiten.','Wind ab Welt 3: alle 90 s für 5 s, bremst dich.','Mit Marshmallow weht er dich nach hinten!']},
  {x:2400,title:'Spaghetti',kind:'character',value:0,lines:['W wechselt zu Spaghetti. E hängt dich an Haken.','Zweimal schwingen, dann 5 s Abklingzeit.','Space lässt los. A/D gibt Schwung.']},
  {x:3050,title:'Mandarine',kind:'character',value:1,lines:['W wechselt zur Mandarine. E ruft vier Babys.','Die Babys kämpfen 5 s für dich: je 0,5 HP.','Du bleibst dabei die große Mandarine.']},

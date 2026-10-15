@@ -1,4 +1,4 @@
-// Fifteen original local cartoon drawings for the ten-world expansion.
+// Original local cartoon drawings for the expanded food worlds.
 const fs=require('node:fs');fs.mkdirSync('assets/sprites',{recursive:true});
 const edge='#392f3b';
 const limbs='<path d="M31 81 L12 96 M97 81 L117 93 M46 113 L42 144 L31 149 M81 113 L86 144 L98 149" fill="none" stroke-width="3"/>';
@@ -21,4 +21,5 @@ save('olive','<ellipse cx="64" cy="77" rx="36" ry="52" fill="#778d57"/><path d="
 save('pretzel','<path d="M64 46 Q20 9 14 59 Q12 100 50 115 Q80 120 106 92 Q132 54 98 33 Q77 22 64 46 L38 104 Q34 113 43 118 L55 120 Q67 117 62 107 L38 55 Q29 37 23 60 Q22 78 42 87 Q69 101 93 84 Q105 66 94 52 Q85 42 77 63 L51 111" fill="#c79251" stroke="#a5723f" stroke-width="14"/><g fill="#fff0c5" stroke="none"><circle cx="21" cy="52" r="2"/><circle cx="40" cy="111" r="2"/><circle cx="98" cy="53" r="2"/><circle cx="101" cy="82" r="2"/></g>');
 save('pepper','<path d="M42 37 Q22 22 17 69 Q10 108 34 124 Q53 137 65 123 Q84 137 102 119 Q123 92 109 51 Q99 26 77 37 Z" fill="#db7951"/><path d="M35 47 Q23 75 31 104 M91 48 Q106 76 96 103" fill="none" stroke="#f9bc7a" stroke-width="4"/>','<path d="M48 37 L58 26 L65 4 L78 8 L71 28 L83 38 L65 44 Z" fill="#719c59"/>');
 save('cookie','<path d="M17 56 L28 32 L51 26 L68 32 L86 27 L103 43 L108 64 L116 81 L106 105 L91 122 L64 129 L38 119 L22 105 L14 82 Z" fill="#d4a367"/><g fill="#755442" stroke="none"><circle cx="33" cy="49" r="6"/><circle cx="89" cy="49" r="7"/><circle cx="29" cy="95" r="7"/><circle cx="95" cy="107" r="6"/><circle cx="59" cy="116" r="5"/></g>');
-console.log('Created 10 new boss sprites and 5 new enemy sprites.');
+save('boss-applesauce','<path d="M29 44 Q17 57 20 104 Q21 128 64 132 Q110 129 110 105 L108 57 Q104 46 97 43 Z" fill="#d4e8df"/><path d="M26 64 Q40 53 56 65 Q72 51 103 63 L103 106 Q99 122 64 124 Q27 122 26 105 Z" fill="#e9c578"/><path d="M29 48 L28 35 L100 35 L100 48 Z" fill="#a1b578"/><path d="M31 39 L97 39" stroke="#d9e3b4" stroke-width="4"/><path d="M28 73 L29 100" stroke="#fff8df" stroke-width="4"/><path d="M110 84 L117 41" stroke="#a67b4a" stroke-width="6"/><ellipse cx="119" cy="29" rx="8" ry="16" transform="rotate(10 119 29)" fill="#d4ac72"/><path d="M59 119 Q52 110 58 106 Q64 103 68 107 Q77 103 80 110 Q79 119 69 122 Z" fill="#bd6652"/><path d="M67 108 Q66 98 74 99" fill="none" stroke="#6c914e" stroke-width="3"/>',crown);
+console.log('Created 11 expansion boss sprites and 5 enemy sprites.');

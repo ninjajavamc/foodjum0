@@ -31,7 +31,7 @@ function drawStart(){
 }
 function worldMenuPage(){return Math.floor((Math.max(1,selectedLevel)-1)/7)}
 function drawLevelSelect(){
- x.save();x.fillStyle='rgba(25,43,53,.84)';fillViewport();x.textAlign='center';x.fillStyle='#ffebad';x.font='bold 40px system-ui';x.fillText('WELT-AUSWAHL',W/2,82);x.fillStyle='#e0eee1';x.font='19px system-ui';x.fillText('17 Abenteuer mit eigenen Bossen',W/2,115);
+ x.save();x.fillStyle='rgba(25,43,53,.84)';fillViewport();x.textAlign='center';x.fillStyle='#ffebad';x.font='bold 40px system-ui';x.fillText('WELT-AUSWAHL',W/2,82);x.fillStyle='#e0eee1';x.font='19px system-ui';x.fillText((Object.keys(LEVEL_SETTINGS).length-1)+' Abenteuer mit eigenen Bossen',W/2,115);
  const page=worldMenuPage(),count=Object.keys(LEVEL_SETTINGS).length-1,pages=Math.ceil(count/7);
  menuButtons=[{id:'back',x:25,y:22,w:140,h:38}];
  for(let i=0;i<7&&page*7+i+1<=count;i++){
